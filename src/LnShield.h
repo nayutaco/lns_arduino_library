@@ -63,7 +63,7 @@ public:
      * @note
      *      - amount[0]が #LNAMOUNT_INVALID_VAL の場合、着金無し
      */
-    int polling(unsigned long amount[], char* status=NULL);
+    int polling(unsigned long amount[], char status[]);
 
     /** アドレス発行
      * 受信するためのBitcoinアドレスを生成する。
@@ -121,10 +121,14 @@ public:
 
     Status_t getStatus() { return sStatus; }
 
+
+    void sendTest(uint8_t cmd, const uint8_t *pData, uint8_t len) { send(cmd, pData, len); }
+
 private:
     void send(uint8_t cmd, const uint8_t *pData, uint8_t len);
     int recv(uint8_t cmd);
     unsigned long changeSatoshi(unsigned long val, int unit);
+    bool checkRecvTimeout(int rdCnt);
 
 
 private:

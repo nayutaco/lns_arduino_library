@@ -3,14 +3,13 @@
 #include <string.h>
 #include "LnShield.h"
 
-#define DEBUG_INIT()
 //#define DEBUG_OUT       Serial.println
 #define DEBUG_OUT(...)
-#define PIN_OE          (4)  //UARTのOutput Enable
+#define PIN_OE              (4)         //UARTのOutput Enable
+#define UART_SPEED          (115200)
+#define STARTUP_OE_DELAY    (3000)      //ResetしてからRasPi間のUARTを有効にするまでの時間[msec]
 
 namespace {
-    const int UART_SPEED = 9600;
-
     const uint8_t CMD_INIT = 0x00;               ///< 起動
     const uint8_t CMD_GET_BALANCE = 0x01;        ///< 所有額取得
     const uint8_t CMD_ISSUE = 0x02;              ///< アドレス発行
@@ -29,7 +28,6 @@ LnShield::Status_t LnShield::sStatus = LnShield::STAT_STARTUP;
 
 LnShield::LnShield() : mpSerial(0),  mFee(50000)
 {
-    DEBUG_INIT();
 }
 
 
@@ -45,9 +43,13 @@ int LnShield::init(byte confs)
         return LNERR_ALREADY_INIT;
     }
 
-    //Output Enable
     pinMode(PIN_OE, OUTPUT);
+
+    //PIN_OE
     digitalWrite(PIN_OE, HIGH);
+    //for Arduino program write
+    delay(STARTUP_OE_DELAY);
+    digitalWrite(PIN_OE, LOW);
 
     Serial.begin(UART_SPEED);
     mConfs = confs;
@@ -69,28 +71,62 @@ void LnShield::stop()
 
     send(CMD_STOP, 0, 0);
 
-    //GPIO:OutputEnable
     delay(100);
-    digitalWrite(PIN_OE, LOW);
-    delay(100);
-    Serial.begin(115200);
-    delay(100);
-    Serial.println("Raspberry Pi stop.");
+    digitalWrite(PIN_OE, HIGH);
 }
 
 
-int LnShield::polling(unsigned long amount[], char* status/*=NULL*/)
+int LnShield::polling(unsigned long amount[], char status[])
 {
+    const byte INITRD[] = { 0x12, 0x34, 0x56, 0x78, 0x9a };
+    const byte INITWT[] = { 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x9a, 0x78, 0x56, 0x34, 0x12 };
+
     int err = 0;
     int res;
 
     amount[0] = LNAMOUNT_INVALID_VAL;       //no receive
-    if (status != NULL) {
-        status[0] = LNPAYSTAT_NONE;
-    }
+    status[0] = LNPAYSTAT_NONE;
 
     switch (sStatus) {
     case STAT_STARTING:
+        while (true) {
+            if (mpSerial->available() > 0) {
+                byte rd = mpSerial->read();
+                if (rd == 0x55) {
+                    break;
+                }
+            } else {
+                delay(500);
+            }
+        }
+        while (true) {
+            if (mpSerial->available() > 0) {
+                byte rd = mpSerial->read();
+                if (rd != 0x55) {
+                    break;
+                }
+            } else {
+                delay(500);
+            }
+        }
+        while (mpSerial->available() < sizeof(INITRD)) {
+            delay(100);
+        }
+        {
+            int lp = 0;
+            for (lp = 0; lp < sizeof(INITRD); lp++) {
+                if (mpSerial->read() != INITRD[lp]) {
+                    break;
+                }
+            }
+            if (lp == sizeof(INITRD)) {
+                mpSerial->write(INITWT, sizeof(INITWT));
+                sStatus = STAT_WAITING;
+            } else {
+                mpSerial->write(INITRD, sizeof(INITRD));
+            }
+        }
+        break;
     case STAT_WAITING:
         //初期化中
         send(CMD_INIT, &mConfs, 1);
@@ -315,20 +351,11 @@ int LnShield::recv(uint8_t cmd)
 {
     int rd;
     uint16_t timeout = 0;
-    const uint16_t TIMEOUT_SHORT_CNT = 100;
     const uint16_t TIMEOUT_CNT = 1000;
     const int DELAY = 50;
 
-    while ((mpSerial->available() < 4) && (timeout < TIMEOUT_SHORT_CNT)) {
-        delay(DELAY);
-        timeout++;
-    }
-    if (timeout >= TIMEOUT_SHORT_CNT) {
-        DEBUG_OUT("recv timeout1");
+    if (!checkRecvTimeout(4)) {
         return -1;
-    }
-    for (int lp = 0; lp < 4; lp++) {
-        mRecvBuf[lp] = mpSerial->read();
     }
     while (true) {
         if ((mRecvBuf[0] == 0x00) && (mRecvBuf[1] == 0xff) && ((uint8_t)(mRecvBuf[2] + mRecvBuf[3]) == 0x00)) {
@@ -426,4 +453,23 @@ unsigned long LnShield::changeSatoshi(unsigned long val, int unit)
     }
 
     return val;
+}
+
+
+bool LnShield::checkRecvTimeout(int rdCnt)
+{
+    uint16_t timeout = 0;
+    const uint16_t TIMEOUT_SHORT_CNT = 100;
+    const int DELAY = 50;
+
+    while ((mpSerial->available() >= rdCnt) && (timeout < TIMEOUT_SHORT_CNT)) {
+        delay(DELAY);
+        timeout++;
+    }
+    if (timeout >= TIMEOUT_SHORT_CNT) {
+        DEBUG_OUT("recv timeout1");
+        return false;
+    }
+
+    return true;
 }
