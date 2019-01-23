@@ -34,13 +34,14 @@ public:
     enum Status_t {
         STAT_STARTUP,       //起動直後
         STAT_STARTING,      //init()呼び出し後
-        STAT_WAITING,       //初期化中
-        STAT_STARTED,       //通信直後はもたつくので、pollを待つ
+        STAT_HANDSHAKE1,
+        STAT_HANDSHAKE2,
+        STAT_HANDSHAKE3,
         STAT_INITED,        //定常状態
     };
 
 public:
-    LnShield();
+    LnShield(int pinOutputEnable);
     virtual ~LnShield();
 
 public:
@@ -122,9 +123,8 @@ public:
     Status_t getStatus() { return sStatus; }
 
 
-    void sendTest(uint8_t cmd, const uint8_t *pData, uint8_t len) { send(cmd, pData, len); }
-
 private:
+    int handshake();
     void send(uint8_t cmd, const uint8_t *pData, uint8_t len);
     int recv(uint8_t cmd);
     unsigned long changeSatoshi(unsigned long val, int unit);
@@ -135,10 +135,10 @@ private:
     static Status_t     sStatus;
 
 private:
+    int                 mPinOE;             ///< OutputEnable
     uint8_t             mSendBuf[64];       ///< 送信バッファ
     uint8_t             mRecvBuf[64];       ///< 受信バッファ
     char                mRecvAddr[40];      ///< 着金アドレス
-    Stream*             mpSerial;           ///< BitcoinShieldとの通信. #init()で設定するが、0の場合はインスタンスとして使用できない。
     uint32_t            mFee;               ///< 手数料[単位:satoshi]
     byte                mConfs;             ///< CONFIRMATION数(kingfisher1号のみ有効)
 };
