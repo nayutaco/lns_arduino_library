@@ -59,13 +59,7 @@ int LnShield::init(byte confs)
 
 void LnShield::stop()
 {
-    if(sStatus == STAT_INITED) {
-        DEBUG_OUT("not initialied");
-        return;
-    }
-
     send(CMD_STOP, 0, 0);
-
     delay(100);
 }
 
