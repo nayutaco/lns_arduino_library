@@ -19,11 +19,11 @@ public:
 
     enum Err_t {
         ENONE,
-        ERROR,                  ///< 処理中
+        ERROR,                  ///< エラー
 
-        EUART_RD_HEAD,
-        EUART_RD_DATA,
-        EUART_RD_REPLY,
+        EUART_RD_HEAD,          ///< uart packet Header不正
+        EUART_RD_DATA,          ///< uart packet Data不正
+        EUART_RD_REPLY,         ///< uart packet response不正
 
         EALREADY_INIT,          ///< 初期化済みでinit()を呼び出した
         EDISABLED,              ///< インスタンス使用不可

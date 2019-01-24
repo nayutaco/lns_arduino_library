@@ -3,22 +3,30 @@
 #include <string.h>
 #include "LnShield.h"
 
-#define UART_SPEED          (115200)
 
+/********************************************************************
+ * 
+ ********************************************************************/
 
 namespace
 {
-    const uint8_t CMD_GET_BALANCE = 0x01;        ///< 所有額取得
-    const uint8_t CMD_GETNEWADDRESS = 0x02;      ///< アドレス発行
-    const uint8_t CMD_SEND = 0x03;               ///< 送金
-    const uint8_t CMD_FEERATE = 0x04;            ///< FEE設定
+    const int UART_SPEED = 115200;              ///< bps
 
-    const uint8_t CMD_POLL = 0x7e;               ///< 生存確認
-    const uint8_t CMD_STOP = 0x7f;               ///< Raspi停止
+    const uint8_t CMD_GET_BALANCE = 0x01;       ///< 所有額取得
+    const uint8_t CMD_GETNEWADDRESS = 0x02;     ///< アドレス発行
+    const uint8_t CMD_SEND = 0x03;              ///< 送金
+    const uint8_t CMD_FEERATE = 0x04;           ///< FEE設定
 
-    const uint8_t RES_FLAG = 0x80;               ///< レスポンスフラグ
+    const uint8_t CMD_POLL = 0x7e;              ///< 生存確認
+    const uint8_t CMD_STOP = 0x7f;              ///< Raspi停止
+
+    const uint8_t RES_FLAG = 0x80;              ///< レスポンスフラグ
 }
 
+
+/********************************************************************
+ * local functions
+ ********************************************************************/
 
 namespace {
     uint16_t getBe16_(const uint8_t *pData) {
@@ -39,6 +47,10 @@ namespace {
 }
 
 
+/********************************************************************
+ * ctor/dtor
+ ********************************************************************/
+
 LnShield::LnShield(int pinOutputEnable)
     : mPinOE(pinOutputEnable), mStatus(STAT_STARTUP)
 {
@@ -49,6 +61,10 @@ LnShield::~LnShield()
 {
 }
 
+
+/********************************************************************
+ * public methods
+ ********************************************************************/
 
 LnShield::Err_t LnShield::init()
 {
@@ -83,57 +99,6 @@ LnShield::Err_t LnShield::stop()
 }
 
 
-LnShield::Err_t LnShield::handshake()
-{
-    const uint8_t INITRD[] = { 0x12, 0x34, 0x56, 0x78, 0x9a };
-    const uint8_t INITWT[] = { 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x9a, 0x78, 0x56, 0x34, 0x12 };
-
-    Err_t err = ENONE;
-
-    if (mStatus == STAT_STARTING) {
-        if (Serial.available() > 0) {
-            uint8_t rd = Serial.read();
-            if (rd == 0x55) {
-                mStatus = STAT_HANDSHAKE1;
-                delay(100);
-            }
-        }
-    }
-    if (mStatus == STAT_HANDSHAKE1) {
-        if (Serial.available() > 0) {
-            uint8_t rd = Serial.read();
-            if (rd != 0x55) {
-                mStatus = STAT_HANDSHAKE2;
-                delay(100);
-            }
-        }
-    }
-    if (mStatus == STAT_HANDSHAKE2) {
-        if (Serial.available() >= sizeof(INITRD)) {
-            mStatus = STAT_HANDSHAKE3;
-            delay(100);
-        }
-    }
-    if (mStatus == STAT_HANDSHAKE3) {
-        int lp = 0;
-        for (lp = 0; lp < sizeof(INITRD); lp++) {
-            if (Serial.read() != INITRD[lp]) {
-                break;
-            }
-        }
-        if (lp == sizeof(INITRD)) {
-            Serial.write(INITWT, sizeof(INITWT));
-            mStatus = STAT_INITED;
-        } else {
-            mStatus = STAT_STARTING;
-            err = EINVALID_RES;
-        }
-    }
-
-    return err;
-}
-
-
 LnShield::Err_t LnShield::polling()
 {
     Err_t err = ENONE;
@@ -155,6 +120,23 @@ LnShield::Err_t LnShield::polling()
         break;
     }
 
+    return err;
+}
+
+
+LnShield::Err_t LnShield::getBalance(uint64_t balance[])
+{
+    Err_t err = ENONE;
+    uint16_t recv_len;
+
+    err = uartSendCmd(CMD_GET_BALANCE, 0, 0, &recv_len);
+    if (err == ENONE) {
+        if (recv_len == sizeof(uint64_t)) {
+            balance[0] = getBe64_(mWorkBuf);
+        } else {
+            err = EINVALID_RES;
+        }
+    }
     return err;
 }
 
@@ -223,15 +205,57 @@ LnShield::Err_t LnShield::sendBitcoin(const char sendAddr[], uint64_t amount)
 }
 
 
-LnShield::Err_t LnShield::getBalance(uint64_t balance[])
-{
-    Err_t err = ENONE;
-    uint16_t recv_len;
+/********************************************************************
+ * private methods
+ ********************************************************************/
 
-    err = uartSendCmd(CMD_GET_BALANCE, 0, 0, &recv_len);
-    if (err == ENONE) {
-        balance[0] = getBe64_(mWorkBuf);
+LnShield::Err_t LnShield::handshake()
+{
+    const uint8_t INITRD[] = { 0x12, 0x34, 0x56, 0x78, 0x9a };
+    const uint8_t INITWT[] = { 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x9a, 0x78, 0x56, 0x34, 0x12 };
+
+    Err_t err = ENONE;
+
+    if (mStatus == STAT_STARTING) {
+        if (Serial.available() > 0) {
+            uint8_t rd = Serial.read();
+            if (rd == 0x55) {
+                mStatus = STAT_HANDSHAKE1;
+                delay(100);
+            }
+        }
     }
+    if (mStatus == STAT_HANDSHAKE1) {
+        if (Serial.available() > 0) {
+            uint8_t rd = Serial.read();
+            if (rd != 0x55) {
+                mStatus = STAT_HANDSHAKE2;
+                delay(100);
+            }
+        }
+    }
+    if (mStatus == STAT_HANDSHAKE2) {
+        if (Serial.available() >= sizeof(INITRD)) {
+            mStatus = STAT_HANDSHAKE3;
+            delay(100);
+        }
+    }
+    if (mStatus == STAT_HANDSHAKE3) {
+        int lp = 0;
+        for (lp = 0; lp < sizeof(INITRD); lp++) {
+            if (Serial.read() != INITRD[lp]) {
+                break;
+            }
+        }
+        if (lp == sizeof(INITRD)) {
+            Serial.write(INITWT, sizeof(INITWT));
+            mStatus = STAT_INITED;
+        } else {
+            mStatus = STAT_STARTING;
+            err = EINVALID_RES;
+        }
+    }
+
     return err;
 }
 
