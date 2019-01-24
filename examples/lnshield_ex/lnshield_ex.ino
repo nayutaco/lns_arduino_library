@@ -52,12 +52,12 @@ namespace {
   void op_halt_stop()
   {
     sStat = ST_STOP;
+    beep(3);
     sLn.stop();
-    beep(3);
     beep(4);
-    beep(3);
     digitalWrite(PIN_LED_RED, LOW);
     digitalWrite(PIN_LED_GRN, LOW);
+    beep(3);
     while (true) {
       ;
     }
@@ -74,7 +74,7 @@ void setup() {
 
   digitalWrite(PIN_LED_RED, HIGH);
   digitalWrite(PIN_LED_GRN, HIGH);
-  sLn.init(0);
+  sLn.init();
   
   beep(0);
   digitalWrite(PIN_LED_RED, HIGH);
@@ -85,10 +85,7 @@ void setup() {
 void loop() {
   static int led_onoff = 0;
 
-  unsigned long amount;
-  char status;
-
-  int ret = sLn.polling(&amount, &status);
+  int ret = sLn.polling();
   if (ret == 0) {
     op_normal();
   } else {

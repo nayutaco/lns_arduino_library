@@ -3,27 +3,44 @@
 #include <string.h>
 #include "LnShield.h"
 
-//#define DEBUG_OUT       Serial.println
-#define DEBUG_OUT(...)
 #define UART_SPEED          (115200)
+
 
 namespace
 {
-const uint8_t CMD_INIT = 0x00;               ///< 起動
-const uint8_t CMD_GET_BALANCE = 0x01;        ///< 所有額取得
-const uint8_t CMD_ISSUE = 0x02;              ///< アドレス発行
-const uint8_t CMD_SEND = 0x03;               ///< 送金
-const uint8_t CMD_FEE = 0x04;                ///< FEE設定
-const uint8_t CMD_POLL = 0x70;               ///< 着金確認
-const uint8_t CMD_STOP = 0x7f;               ///< Raspi停止
+    const uint8_t CMD_GET_BALANCE = 0x01;        ///< 所有額取得
+    const uint8_t CMD_GETNEWADDRESS = 0x02;      ///< アドレス発行
+    const uint8_t CMD_SEND = 0x03;               ///< 送金
+    const uint8_t CMD_FEERATE = 0x04;            ///< FEE設定
 
-const uint8_t RES_FLAG = 0x80;               ///< レスポンスフラグ
+    const uint8_t CMD_POLL = 0x7e;               ///< 生存確認
+    const uint8_t CMD_STOP = 0x7f;               ///< Raspi停止
+
+    const uint8_t RES_FLAG = 0x80;               ///< レスポンスフラグ
 }
 
-LnShield::Status_t LnShield::sStatus = LnShield::STAT_STARTUP;
+
+namespace {
+    uint16_t getBe16_(const uint8_t *pData) {
+        return (uint16_t)pData[0] | (((uint16_t)pData[1]) << 8);
+    }
+    int setBe16_(uint8_t *pData, uint16_t Val) {
+        pData[0] = Val >> 8;
+        pData[1] = Val & 0xff;
+        return sizeof(uint16_t);
+    }
+
+    uint64_t getBe64_(const uint8_t *pData) {
+        return (uint64_t)pData[0] |
+                    (((uint64_t)pData[1]) << 8)  |
+                    (((uint64_t)pData[2]) << 16) |
+                    (((uint64_t)pData[3]) << 24);
+    }
+}
 
 
-LnShield::LnShield(int pinOutputEnable) : mPinOE(pinOutputEnable), mFee(50000)
+LnShield::LnShield(int pinOutputEnable)
+    : mPinOE(pinOutputEnable), mStatus(STAT_STARTUP)
 {
 }
 
@@ -33,11 +50,10 @@ LnShield::~LnShield()
 }
 
 
-int LnShield::init(byte confs)
+LnShield::Err_t LnShield::init()
 {
-    if(sStatus != STAT_STARTUP) {
-        DEBUG_OUT("already init1");
-        return LNERR_ALREADY_INIT;
+    if (mStatus != STAT_STARTUP) {
+        return EALREADY_INIT;
     }
 
     pinMode(mPinOE, OUTPUT);
@@ -48,66 +64,69 @@ int LnShield::init(byte confs)
     digitalWrite(mPinOE, LOW);
 
     Serial.begin(UART_SPEED);
-    mConfs = confs;
 
     //初期化開始
-    sStatus = STAT_STARTING;
+    mStatus = STAT_STARTING;
 
-    return 0;
+    return ENONE;
 }
 
 
-void LnShield::stop()
+LnShield::Err_t LnShield::stop()
 {
-    send(CMD_STOP, 0, 0);
+    Err_t err;
+    uint16_t RecvLen;
+    err = uartSendCmd(CMD_STOP, 0, 0, &RecvLen);
     delay(100);
+
+    return err;
 }
 
 
-int LnShield::handshake()
+LnShield::Err_t LnShield::handshake()
 {
-    const byte INITRD[] = { 0x12, 0x34, 0x56, 0x78, 0x9a };
-    const byte INITWT[] = { 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x9a, 0x78, 0x56, 0x34, 0x12 };
+    const uint8_t INITRD[] = { 0x12, 0x34, 0x56, 0x78, 0x9a };
+    const uint8_t INITWT[] = { 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x9a, 0x78, 0x56, 0x34, 0x12 };
 
-    int err = 0;
+    Err_t err = ENONE;
 
-    if(sStatus == STAT_STARTING) {
-        if(Serial.available() > 0) {
-            byte rd = Serial.read();
-            if(rd == 0x55) {
-                sStatus = STAT_HANDSHAKE1;
+    if (mStatus == STAT_STARTING) {
+        if (Serial.available() > 0) {
+            uint8_t rd = Serial.read();
+            if (rd == 0x55) {
+                mStatus = STAT_HANDSHAKE1;
                 delay(100);
             }
         }
     }
-    if(sStatus == STAT_HANDSHAKE1) {
-        if(Serial.available() > 0) {
-            byte rd = Serial.read();
-            if(rd != 0x55) {
-                sStatus = STAT_HANDSHAKE2;
+    if (mStatus == STAT_HANDSHAKE1) {
+        if (Serial.available() > 0) {
+            uint8_t rd = Serial.read();
+            if (rd != 0x55) {
+                mStatus = STAT_HANDSHAKE2;
                 delay(100);
             }
         }
     }
-    if(sStatus == STAT_HANDSHAKE2) {
-        if(Serial.available() >= sizeof(INITRD)) {
-            sStatus = STAT_HANDSHAKE3;
+    if (mStatus == STAT_HANDSHAKE2) {
+        if (Serial.available() >= sizeof(INITRD)) {
+            mStatus = STAT_HANDSHAKE3;
             delay(100);
         }
     }
-    if(sStatus == STAT_HANDSHAKE3) {
+    if (mStatus == STAT_HANDSHAKE3) {
         int lp = 0;
-        for(lp = 0; lp < sizeof(INITRD); lp++) {
-            if(Serial.read() != INITRD[lp]) {
+        for (lp = 0; lp < sizeof(INITRD); lp++) {
+            if (Serial.read() != INITRD[lp]) {
                 break;
             }
         }
-        if(lp == sizeof(INITRD)) {
+        if (lp == sizeof(INITRD)) {
             Serial.write(INITWT, sizeof(INITWT));
-            sStatus = STAT_INITED;
+            mStatus = STAT_INITED;
         } else {
-            sStatus = STAT_STARTING;
-            err = LNERR_INVALID_RES;
+            mStatus = STAT_STARTING;
+            err = EINVALID_RES;
         }
     }
 
@@ -115,15 +134,12 @@ int LnShield::handshake()
 }
 
 
-int LnShield::polling(unsigned long amount[], char status[])
+LnShield::Err_t LnShield::polling()
 {
-    int err = 0;
-    int res;
+    Err_t err = ENONE;
+    uint16_t recv_len;
 
-    amount[0] = LNAMOUNT_INVALID_VAL;       //no receive
-    status[0] = LNPAYSTAT_NONE;
-
-    switch(sStatus) {
+    switch (mStatus) {
     case STAT_STARTING:
     case STAT_HANDSHAKE1:
     case STAT_HANDSHAKE2:
@@ -133,150 +149,90 @@ int LnShield::polling(unsigned long amount[], char status[])
 
     case STAT_INITED:
         //定常状態
-        send(CMD_POLL, 0, 0);
-        res = recv(CMD_POLL);
-        if(res == 4) {
-            amount[0] = mRecvBuf[1] | (((unsigned long)mRecvBuf[2]) << 8) | (((unsigned long)mRecvBuf[3]) << 16) | (((unsigned long)mRecvBuf[4]) << 24);
-            DEBUG_OUT(amount[0]);
-        } else if(res == 0) {
-            //no receive
-        } else if(res == 1) {
-            if(status != NULL) {
-                status[0] = mRecvBuf[1];
-            }
-            DEBUG_OUT(mRecvBuf[1]);
-        } else {
-            DEBUG_OUT("poll: invalid res");
-            err = LNERR_INVALID_RES;
-        }
+        err = uartSendCmd(CMD_POLL, 0, 0, &recv_len);
         break;
-
     default:
         break;
     }
 
-    //呼び出し側がある程度のdelayを持たせる前提
-    //delay(1000);
-
     return err;
 }
 
 
-int LnShield::issueAddress()
+LnShield::Err_t LnShield::getNewAddress(char address[])
 {
-    if(sStatus != STAT_INITED) {
-        DEBUG_OUT("not initialied");
-        return LNERR_DISABLED;
+    if (mStatus != STAT_INITED) {
+        return EDISABLED;
     }
 
-    int err = 0;
+    Err_t err = ENONE;
+    uint16_t recv_len;
 
-    send(CMD_ISSUE, 0, 0);
-    int res = recv(CMD_ISSUE);
-    if(res > 0) {
-        memcpy(mRecvAddr, &mRecvBuf[1], res);
-        mRecvAddr[res] = '\0';
-        DEBUG_OUT(mRecvAddr);
-    } else {
-        DEBUG_OUT("issue: invalid res");
-        err = LNERR_INVALID_RES;
+    err = uartSendCmd(CMD_GETNEWADDRESS, 0, 0, &recv_len);
+    if (err == ENONE) {
+        memcpy(address, &mWorkBuf[1], recv_len);
     }
     return err;
 }
 
 
-int LnShield::requestBitcoin(unsigned long amount, int unit, const char label[], const char message[])
+LnShield::Err_t LnShield::setFeeRate(uint32_t feerate)
 {
-    if(sStatus != STAT_INITED) {
-        DEBUG_OUT("not initialied");
-        return LNERR_DISABLED;
+    if (mStatus != STAT_INITED) {
+        return EDISABLED;
     }
 
-    return LNERR_ERROR;
-}
+    uint8_t send_buf[4];
+    Err_t err = ENONE;
+    uint16_t recv_len;
 
+    send_buf[0] = (uint8_t)(feerate & 0xff);
+    send_buf[1] = (uint8_t)((feerate & 0xff00) >> 8);
+    send_buf[2] = (uint8_t)((feerate & 0xff0000) >> 16);
+    send_buf[3] = (uint8_t)((feerate & 0xff000000) >> 24);
 
-int LnShield::setFee(unsigned long fee, int unit)
-{
-    if(sStatus != STAT_INITED) {
-        DEBUG_OUT("not initialied");
-        return LNERR_DISABLED;
-    }
-    if((unit < LNUNIT_SATOSHI) || (LNUNIT_BTC < unit)) {
-        return LNERR_INVALID_PARAM;
-    }
-
-    mFee = changeSatoshi(fee, unit);
-
-    int err = 0;
-    uint8_t sendBuf[4];
-
-    sendBuf[0] = (byte)(mFee & 0xff);
-    sendBuf[1] = (byte)((mFee & 0xff00) >> 8);
-    sendBuf[2] = (byte)((mFee & 0xff0000) >> 16);
-    sendBuf[3] = (byte)((mFee & 0xff000000) >> 24);
-
-    DEBUG_OUT("fee");
-    send(CMD_FEE, sendBuf, 4);
-    int res = recv(CMD_FEE);
-    if(res > 0) {
-        DEBUG_OUT(mRecvBuf[1]);
-    } else {
-        DEBUG_OUT("fee: invalid res");
-        err = LNERR_INVALID_RES;
+    err = uartSendCmd(CMD_FEERATE, send_buf, sizeof(send_buf), &recv_len);
+    if (err == ENONE) {
     }
     return err;
 }
 
 
-int LnShield::sendBitcoin(const char sendAddr[], unsigned long amount, int unit)
+LnShield::Err_t LnShield::sendBitcoin(const char sendAddr[], uint64_t amount)
 {
-    if(sStatus != STAT_INITED) {
-        DEBUG_OUT("not initialied");
-        return LNERR_DISABLED;
+    if (mStatus != STAT_INITED) {
+        return EDISABLED;
     }
 
-    int err = 0;
-    uint8_t sendBuf[64];
+    uint8_t send_buf[64];
+    Err_t err = ENONE;
+    uint16_t recv_len;
 
-    int len = strlen(sendAddr);
-    unsigned long val = changeSatoshi(amount, unit);
-    sendBuf[0] = (byte)(val & 0xff);
-    sendBuf[1] = (byte)((val & 0xff00) >> 8);
-    sendBuf[2] = (byte)((val & 0xff0000) >> 16);
-    sendBuf[3] = (byte)((val & 0xff000000) >> 24);
-    strcpy((char *)&sendBuf[4], sendAddr);
+    size_t len = strlen(sendAddr);
+    uint64_t mask = 0xff;
+    for (int lp = 0; lp < sizeof(amount); lp++) {
+        send_buf[lp] = (uint8_t)((amount & mask) >> (8 * lp));
+        mask <<= 8;
+    }
+    strcpy((char *)&send_buf[4], sendAddr);
 
-    DEBUG_OUT("send");
-    send(CMD_SEND, sendBuf, 4 + len);
-    int res = recv(CMD_SEND);
-    if(res > 0) {
-        DEBUG_OUT(mRecvBuf[1]);
-    } else {
-        DEBUG_OUT("send: invalid res");
-        err = LNERR_INVALID_RES;
+    err = uartSendCmd(CMD_SEND, send_buf, 4 + len, &recv_len);
+    if (err == ENONE) {
     }
     return err;
 }
 
 
-unsigned long LnShield::getBalance()
+LnShield::Err_t LnShield::getBalance(uint64_t balance[])
 {
-    if(sStatus != STAT_INITED) {
-        DEBUG_OUT("not initialied");
-        return 0;
-    }
+    Err_t err = ENONE;
+    uint16_t recv_len;
 
-    unsigned long ret = LNAMOUNT_INVALID_VAL;
-
-    send(CMD_GET_BALANCE, 0, 0);
-    int res = recv(CMD_GET_BALANCE);
-    if(res == 4) {
-        ret = mRecvBuf[1] | (((unsigned long)mRecvBuf[2]) << 8) | (((unsigned long)mRecvBuf[3]) << 16) | (((unsigned long)mRecvBuf[4]) << 24);
-    } else {
-        DEBUG_OUT("balance: invalid res");
+    err = uartSendCmd(CMD_GET_BALANCE, 0, 0, &recv_len);
+    if (err == ENONE) {
+        balance[0] = getBe64_(mWorkBuf);
     }
-    return ret;
+    return err;
 }
 
 
@@ -284,160 +240,78 @@ unsigned long LnShield::getBalance()
 
 /** BitcoinShieldへの送信
  *
- * @param[in]   cmd     送信コマンド(cmdXxx)
+ * @param[in]   Cmd     送信コマンド(cmdXxx)
  * @param[in]   pData   送信データ
- * @param[in]   len     pData長
+ * @param[in]   Len     pData長
+ * @return      エラー
  */
-void LnShield::send(uint8_t cmd, const uint8_t *pData, uint8_t len)
+void LnShield::uartSend(uint8_t Cmd, const uint8_t *pData, uint16_t Len)
 {
-    mSendBuf[0] = 0x00;
-    mSendBuf[1] = 0xff;
-    mSendBuf[2] = len + 1;
-    mSendBuf[3] = (uint8_t)(0 - mSendBuf[2]);
-    mSendBuf[4] = cmd;
-    for(uint8_t lp = 0; lp < len; lp++) {
-        mSendBuf[5 + lp] = pData[lp];
-        cmd += pData[lp];
+    mWorkBuf[0] = 0x00;
+    mWorkBuf[1] = 0xff;
+    mWorkBuf[2] = Len >> 8;
+    mWorkBuf[3] = Len & 0xff;
+    mWorkBuf[4] = (uint8_t)(0 - mWorkBuf[2] - mWorkBuf[3]);
+    mWorkBuf[5] = Cmd;
+    uint8_t dcs;
+    for (uint8_t lp = 0; lp < Len; lp++) {
+        mWorkBuf[6 + lp] = pData[lp];
+        dcs += pData[lp];
     }
-    mSendBuf[5 + len] = (uint8_t)(0 - cmd);     //DCS
-    mSendBuf[5 + len + 1] = 0xef;
+    mWorkBuf[6 + Len] = (uint8_t)(0 - dcs);     //DCS
+    mWorkBuf[6 + Len + 1] = 0xef;
 
-    //Serial.println("----");
-    //for (int lp = 0; lp < len + 7; lp++) {
-    //    Serial.println(mSendBuf[lp], HEX);
-    //}
-    //Serial.println("----");
-
-    Serial.write(mSendBuf, len + 7);
+    Serial.write(mWorkBuf, Len + 8);
 }
 
 
 /** BitcoinShieldからの受信
  *
- * @param[in]   cmd     受信待ちコマンド
- * @retval      >=0     受信データ長(レスポンスコマンドを含まない)
- * @retval      <0      エラー
+ * @param[in]   Cmd     受信待ちコマンド
+ * @return      エラー
  * @note
- *          - 受信データはmRecvBuf[]に入っている.
- *          - mRecvBuf[0]にレスポンスコマンド、mRecvBuf[1～]にデータが入る.
+ *          - 受信データはmWorkBuf[]に入っている.
  */
-int LnShield::recv(uint8_t cmd)
+LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint16_t *pLen)
 {
     int rd;
-    uint16_t timeout = 0;
-    const uint16_t TIMEOUT_CNT = 1000;
-    const int DELAY = 50;
 
-    if(!checkRecvTimeout(4)) {
-        return -1;
-    }
-    while(true) {
-        if((mRecvBuf[0] == 0x00) && (mRecvBuf[1] == 0xff) && ((uint8_t)(mRecvBuf[2] + mRecvBuf[3]) == 0x00)) {
-            break;
-        } else {
-            mRecvBuf[0] = mRecvBuf[1];
-            mRecvBuf[1] = mRecvBuf[2];
-            mRecvBuf[2] = mRecvBuf[3];
-            timeout = 0;
-            while((Serial.available() < 1) && (timeout < TIMEOUT_CNT)) {
-                delay(DELAY);
-                timeout++;
-            }
-            if(timeout >= TIMEOUT_CNT) {
-                DEBUG_OUT("recv timeout1a");
-                return -1;
-            }
-            mRecvBuf[3] = Serial.read();
-        }
+    rd = Serial.readBytes(mWorkBuf, 6);
+    if ( (rd != 6) ||
+         (mWorkBuf[0] != 0x00) ||
+         (mWorkBuf[1] != 0xff) ||
+         (((mWorkBuf[2] + mWorkBuf[3] + mWorkBuf[4]) & 0xff) != 0x00) ) {
+        return EUART_RD_HEAD;
     }
 
-    uint8_t len = mRecvBuf[2];
-    uint8_t readLen = 0;
+    uint16_t len = getBe16_(mWorkBuf + 2);
+    uint8_t reply = mWorkBuf[5];
+
+    rd = Serial.readBytes(mWorkBuf, len + 2);
     uint8_t dcs = 0;
-    timeout = 0;
-    while((readLen != len) && (timeout < TIMEOUT_CNT)) {
-        if(Serial.available() > 0) {
-            mRecvBuf[readLen] = Serial.read();
-            dcs += mRecvBuf[readLen];
-            readLen++;
-        } else {
-            delay(DELAY);
-            timeout++;
-        }
+    for (size_t lp = 0; lp < len; lp++) {
+        dcs += mWorkBuf[lp];
     }
-    if(timeout >= TIMEOUT_CNT) {
-        DEBUG_OUT("recv timeout2");
-        return -5;
+    if ( (rd != len + 2) ||
+         (((dcs + mWorkBuf[len]) & 0xff) != 0) ||
+         (mWorkBuf[len + 1] != 0xef) ) {
+        return EUART_RD_DATA;
     }
-    while((Serial.available() < 2) && (timeout < TIMEOUT_CNT)) {
-        delay(DELAY);
-        timeout++;
-    }
-    if(timeout >= TIMEOUT_CNT) {
-        DEBUG_OUT("recv timeout3");
-        return -6;
-    }
-    rd = Serial.read();
-    if((uint8_t)(dcs + rd) != 0x00) {
-        DEBUG_OUT("recv [DCS]");
-        DEBUG_OUT(rd);
-        return -7;
-    }
-    rd = Serial.read();
-    if(rd != 0xef) {
-        DEBUG_OUT("recv POST");
-        DEBUG_OUT(rd);
-        return -8;
-    }
-    if((cmd | RES_FLAG) != mRecvBuf[0]) {
-        DEBUG_OUT("recv CMD");
-        DEBUG_OUT(cmd);
-        DEBUG_OUT(mRecvBuf[0]);
-        return -9;
+    if ((Cmd | RES_FLAG) != reply) {
+        return EUART_RD_REPLY;
     }
 
-    return len - 1;     //データの部分だけ
+    *pLen = len - 1;   //データ部分のサイズ
+    return ENONE;
 }
 
 
-/** 単位をsatoshiに変換
- *
- * @param[in]   val     変換対象の値
- * @param[in]   unit    valの単位
- * @retval      satoshiに変換した値
- */
-unsigned long LnShield::changeSatoshi(unsigned long val, int unit)
+LnShield::Err_t LnShield::uartSendCmd(uint8_t Cmd, const uint8_t *pData, uint16_t Len, uint16_t *pRecvLen)
 {
-    switch(unit) {
-    case LNUNIT_MBTC:
-        val *= 10000UL;
-        break;
-    case LNUNIT_BTC:
-        val *= 100000000UL;
-        break;
-    case LNUNIT_SATOSHI:
-    default:
-        break;
-    }
+    Err_t err;
 
-    return val;
-}
-
-
-bool LnShield::checkRecvTimeout(int rdCnt)
-{
-    uint16_t timeout = 0;
-    const uint16_t TIMEOUT_SHORT_CNT = 100;
-    const int DELAY = 50;
-
-    while((Serial.available() >= rdCnt) && (timeout < TIMEOUT_SHORT_CNT)) {
-        delay(DELAY);
-        timeout++;
-    }
-    if(timeout >= TIMEOUT_SHORT_CNT) {
-        DEBUG_OUT("recv timeout1");
-        return false;
-    }
-
-    return true;
+    *pRecvLen = 0;
+    uartSend(Cmd, pData, Len);
+    err = uartRecv(Cmd, pRecvLen);
+    return err;
 }
