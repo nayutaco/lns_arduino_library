@@ -17,14 +17,18 @@ namespace {
     ST_STOP
   } sStat;
 
-  void beep(int num)
+  void beep(int num, int beat)
   {
-    const int BEAT = 300;
     const int HZ[] = {
       262, 294, 330, 349, 392, 440, 494, 523,
     };
-    tone(PIN_BUZZ, HZ[num], BEAT);
-    delay(BEAT);
+    tone(PIN_BUZZ, HZ[num], beat);
+    delay(beat);
+  }
+  void beep(int num)
+  {
+    const int BEAT = 300;
+    beep(num, BEAT);
   }
 
   void op_normal()
@@ -32,16 +36,18 @@ namespace {
     int stat = sLn.getStatus();
     if (stat != sPrevStat) {
       digitalWrite(PIN_LED_RED, (stat == LnShield::STAT_INITED) ? LOW : HIGH);
-      beep(7);
+      beep(0);
       sPrevStat = stat;
     }
   }
 
-  void op_halt_error()
+  void op_halt_error(int err, int snd)
   {
-    beep(2);
     int led = 0;
+
+    beep(snd, 2000);
     while (true) {
+      Serial.write(err);
       digitalWrite(PIN_LED_RED, led);
       digitalWrite(PIN_LED_GRN, led ^ 1);
       delay(200);
@@ -53,7 +59,7 @@ namespace {
   {
     sStat = ST_STOP;
     beep(3);
-    sLn.stop();
+    sLn.cmdStop();
     beep(4);
     digitalWrite(PIN_LED_RED, LOW);
     digitalWrite(PIN_LED_GRN, LOW);
@@ -76,7 +82,6 @@ void setup() {
   digitalWrite(PIN_LED_GRN, HIGH);
   sLn.init();
   
-  beep(0);
   digitalWrite(PIN_LED_RED, HIGH);
   digitalWrite(PIN_LED_GRN, LOW);
   sStat = ST_NORMAL;
@@ -85,15 +90,22 @@ void setup() {
 void loop() {
   static int led_onoff = 0;
 
-  int ret = sLn.polling();
+  int ret = sLn.cmdPolling();
   if (ret == 0) {
     op_normal();
   } else {
-    op_halt_error();
+    op_halt_error(ret, 0);
   }
 
   if (digitalRead(PIN_BTN) != 0) {
-    op_halt_stop();
+    //op_halt_stop();
+    uint64_t balance;
+    ret = sLn.cmdGetBalance(&balance);
+    if (ret == LnShield::ENONE) {
+      sLn.cmdEpaper("Arduino");
+    } else {
+      op_halt_error(ret, 5);
+    }
   }
 
   //heartbeat

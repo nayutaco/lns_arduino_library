@@ -21,8 +21,12 @@ public:
         ENONE,
         ERROR,                  ///< エラー
 
-        EUART_RD_HEAD,          ///< uart packet Header不正
-        EUART_RD_DATA,          ///< uart packet Data不正
+        EUART_RD_HEAD_LEN,      ///< uart packet Header不正
+        EUART_RD_HEAD_PREAMBLE, ///< uart packet Header不正
+        EUART_RD_HEAD_LCS,      ///< uart packet Header不正
+        EUART_RD_TAIL_LEN,      ///< uart packet Data不正
+        EUART_RD_TAIL_POSTAMBLE,///< uart packet Data不正
+        EUART_RD_TAIL_DCS,      ///< uart packet Data不正
         EUART_RD_REPLY,         ///< uart packet response不正
 
         EALREADY_INIT,          ///< 初期化済みでinit()を呼び出した
@@ -36,6 +40,7 @@ public:
     LnShield(int pinOutputEnable);
     virtual ~LnShield();
 
+
 public:
     /** 初期化
      *
@@ -43,18 +48,13 @@ public:
      */
     Err_t init();
 
-    /** Raspberry Pi停止
-     *
-     */
-    Err_t stop();
+
+    Status_t getStatus() const { return mStatus; }
 
 
-    /** 着金確認
-     *
-     * @return  エラー
-     */
-    Err_t polling();
-
+    /********************************************************************
+     * command: Bitcoin
+     ********************************************************************/
 
     /** 支払い可能Bitcoin値取得
      * 現在のウォレットで支払い可能なBitcoin値を取得する。
@@ -62,7 +62,7 @@ public:
      * @param[out]      balance     Bitcoin amount
      * @return  エラー
      */
-    Err_t getBalance(uint64_t balance[]);
+    Err_t cmdGetBalance(uint64_t balance[]);
 
 
     /** アドレス発行
@@ -71,7 +71,7 @@ public:
      * @param[out]      address     Bitcoin Address for receive
      * @return  エラー
      */
-    Err_t getNewAddress(char address[]);
+    Err_t cmdGetNewAddress(char address[]);
 
 
     /** トランザクション手数料設定
@@ -83,7 +83,7 @@ public:
      *      - デフォルト値は、0.5 mBTC(50000 satoshi)
      *      - #sendBitcoin()後に設定した場合は、次回の #setBitcoin()で有効になる。
      */
-    Err_t setFeeRate(uint32_t feerate);
+    Err_t cmdSetFeeRate(uint32_t feerate);
 
 
     /** Bitcoin支払い
@@ -94,16 +94,37 @@ public:
      * @param[in]       amount      送金するBitcoin
      * @return  エラー
      */
-    Err_t sendBitcoin(const char sendAddr[], uint64_t amount);
+    Err_t cmdSendBitcoin(const char sendAddr[], uint64_t amount);
 
 
-    Status_t getStatus() const { return mStatus; }
+    /********************************************************************
+     * command: control
+     ********************************************************************/
+
+    /** Raspberry Pi停止
+     *
+     */
+    Err_t cmdStop();
+
+
+    /** 着金確認
+     *
+     * @return  エラー
+     */
+    Err_t cmdPolling();
+
+
+    /** ePaper出力
+     *
+     * @return  エラー
+     */
+    Err_t cmdEpaper(const char str[]);
 
 
 private:
     Err_t handshake();
     void uartSend(uint8_t Cmd, const uint8_t *pData, uint16_t Len);
-    Err_t uartRecv(uint8_t Cmd, uint16_t *pLen);
+    Err_t uartRecv(uint8_t Cmd, uint16_t *pRecvLen);
     Err_t uartSendCmd(uint8_t Cmd, const uint8_t *pData, uint16_t Len, uint16_t *pRecvLen);
 
 
