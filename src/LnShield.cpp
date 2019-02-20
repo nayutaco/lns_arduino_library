@@ -12,10 +12,12 @@ namespace
 {
     const uint32_t UART_SPEED = 115200;         ///< bps
 
-    const uint8_t CMD_GET_BALANCE = 0x01;       ///< 所有額取得
-    const uint8_t CMD_GETNEWADDRESS = 0x02;     ///< アドレス発行
-    const uint8_t CMD_SEND = 0x03;              ///< 送金
-    const uint8_t CMD_FEERATE = 0x04;           ///< FEE設定
+    const uint8_t CMD_GET_BALANCE = 0x01;       ///< get balance
+    const uint8_t CMD_GETNEWADDRESS = 0x02;     ///< get new bitcoin address
+    const uint8_t CMD_SEND = 0x03;              ///< send bitcoin
+    const uint8_t CMD_FEERATE = 0x04;           ///< set feerate
+
+    const uint8_t CMD_INVOICE = 0x40;           ///< create invoice
 
     const uint8_t CMD_EPAPER = 0x7d;            ///< ePaper出力
     const uint8_t CMD_POLL = 0x7e;              ///< 生存確認
@@ -33,17 +35,47 @@ namespace {
     uint16_t getBe16_(const uint8_t *pData) {
         return ((uint16_t)pData[0] << 8) | (uint16_t)pData[1];
     }
-    int setBe16_(uint8_t *pData, uint16_t Val) {
-        pData[0] = Val >> 8;
-        pData[1] = Val & 0xff;
-        return sizeof(uint16_t);
+
+    uint64_t getBe32_(const uint8_t *pData) {
+        return  ((uint32_t)pData[0] << 24) |
+                ((uint32_t)pData[1] << 16) |
+                ((uint32_t)pData[2] <<  8) |
+                 (uint32_t)pData[3];
     }
 
     uint64_t getBe64_(const uint8_t *pData) {
-        return ((uint64_t)pData[0] << 24) |
-                    ((uint64_t)pData[1] << 16)  |
-                    ((uint64_t)pData[2] << 8) |
-                     (uint64_t)pData[3];
+        return  ((uint64_t)pData[0] << 56) |
+                ((uint64_t)pData[1] << 48) |
+                ((uint64_t)pData[2] << 40) |
+                ((uint64_t)pData[3] << 32) |
+                ((uint64_t)pData[4] << 24) |
+                ((uint64_t)pData[5] << 16) |
+                ((uint64_t)pData[6] <<  8) |
+                 (uint64_t)pData[7];
+    }
+
+    void setBe16_(uint8_t *pData, uint16_t Value) {
+        uint16_t mask = 0xff;
+        for (size_t lp = 0; lp < sizeof(Value); lp++) {
+            pData[sizeof(Value) - lp - 1] = (uint8_t)((Value & mask) >> (8 * lp));
+            mask <<= 8;
+        }
+    }
+
+    void setBe32_(uint8_t *pData, uint32_t Value) {
+        uint32_t mask = 0xff;
+        for (size_t lp = 0; lp < sizeof(Value); lp++) {
+            pData[sizeof(Value) - lp - 1] = (uint8_t)((Value & mask) >> (8 * lp));
+            mask <<= 8;
+        }
+    }
+
+    void setBe64_(uint8_t *pData, uint64_t Value) {
+        uint64_t mask = 0xff;
+        for (size_t lp = 0; lp < sizeof(Value); lp++) {
+            pData[sizeof(Value) - lp - 1] = (uint8_t)((Value & mask) >> (8 * lp));
+            mask <<= 8;
+        }
     }
 }
 
@@ -141,39 +173,50 @@ LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
     Err_t err = ENONE;
     uint16_t recv_len;
 
-    send_buf[0] = (uint8_t)(feerate & 0xff);
-    send_buf[1] = (uint8_t)((feerate & 0xff00) >> 8);
-    send_buf[2] = (uint8_t)((feerate & 0xff0000) >> 16);
-    send_buf[3] = (uint8_t)((feerate & 0xff000000) >> 24);
-
+    setBe32_(send_buf, feerate);
     err = uartSendCmd(CMD_FEERATE, send_buf, sizeof(send_buf), &recv_len);
-    if (err == ENONE) {
-    }
     return err;
 }
 
 
 LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 {
+    return EDISABLED;
+    // if (mStatus != STAT_INITED) {
+    //     return EDISABLED;
+    // }
+
+    // uint8_t send_buf[64];
+    // Err_t err = ENONE;
+    // uint16_t recv_len;
+
+    // size_t len = strlen(sendAddr);
+    // setBe64_(send_buf, amount);
+    // strcpy((char *)&send_buf[4], sendAddr);
+
+    // err = uartSendCmd(CMD_SEND, send_buf, 4 + len, &recv_len);
+    // if (err == ENONE) {
+    // }
+    // return err;
+}
+
+
+/********************************************************************
+ * command: Lightning Network
+ ********************************************************************/
+
+LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat)
+{
     if (mStatus != STAT_INITED) {
         return EDISABLED;
     }
 
-    uint8_t send_buf[64];
+    uint8_t send_buf[8];
     Err_t err = ENONE;
     uint16_t recv_len;
 
-    size_t len = strlen(sendAddr);
-    uint64_t mask = 0xff;
-    for (int lp = 0; lp < sizeof(amount); lp++) {
-        send_buf[lp] = (uint8_t)((amount & mask) >> (8 * lp));
-        mask <<= 8;
-    }
-    strcpy((char *)&send_buf[4], sendAddr);
-
-    err = uartSendCmd(CMD_SEND, send_buf, 4 + len, &recv_len);
-    if (err == ENONE) {
-    }
+    setBe64_(send_buf, amountMsat);
+    err = uartSendCmd(CMD_INVOICE, send_buf, sizeof(send_buf), &recv_len);
     return err;
 }
 

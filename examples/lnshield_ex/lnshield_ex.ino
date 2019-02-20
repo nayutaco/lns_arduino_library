@@ -7,9 +7,12 @@
 #define PIN_BUZZ        (12)  // 圧電スピーカを接続したピン番号
 #define PIN_LED_ERR     (13)  //Arduino UNO上のLED(異常検知)
 
+#define BUTTON_LIMIT    (20)
+
 namespace {
   LnShield sLn(PIN_OE);
   int sPrevStat = -1;
+  int button = 0;
 
   enum Stat_t {
     ST_INIT,
@@ -71,6 +74,9 @@ namespace {
 }
 
 void setup() {
+  beep(7);
+  beep(6);
+  beep(7);
   sStat = ST_INIT;
   pinMode(PIN_BTN, INPUT);
   pinMode(PIN_LED_RED, OUTPUT);
@@ -98,14 +104,24 @@ void loop() {
   }
 
   if (digitalRead(PIN_BTN) != 0) {
-    //op_halt_stop();
-    uint64_t balance;
-    ret = sLn.cmdGetBalance(&balance);
-    if (ret == LnShield::ENONE) {
-      sLn.cmdEpaper("Arduino");
-    } else {
-      op_halt_error(ret, 5);
+    if (button < BUTTON_LIMIT) {
+      button++;
     }
+  } else {
+    button = 0;
+  }
+  if (button == BUTTON_LIMIT) {
+    beep(4);
+//    op_halt_stop();
+//    uint64_t balance;
+//    ret = sLn.cmdGetBalance(&balance);
+//    if (ret == LnShield::ENONE) {
+//      sLn.cmdEpaper("Arduino");
+//    } else {
+//      op_halt_error(ret, 5);
+//    }
+    sLn.cmdInvoice(1000);
+    button++;
   }
 
   //heartbeat
