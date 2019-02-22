@@ -13,6 +13,7 @@ namespace {
   LnShield sLn(PIN_OE);
   int sPrevStat = -1;
   int button = 0;
+  uint64_t our_msat = UINT64_MAX;
 
   enum Stat_t {
     ST_INIT,
@@ -30,7 +31,7 @@ namespace {
   }
   void beep(int num)
   {
-    const int BEAT = 300;
+    const int BEAT = 500;
     beep(num, BEAT);
   }
 
@@ -74,9 +75,9 @@ namespace {
 }
 
 void setup() {
-  beep(7);
+  beep(4);
+  beep(5);
   beep(6);
-  beep(7);
   sStat = ST_INIT;
   pinMode(PIN_BTN, INPUT);
   pinMode(PIN_LED_RED, OUTPUT);
@@ -97,8 +98,17 @@ void loop() {
   static int led_onoff = 0;
 
   int ret = sLn.cmdPolling();
-  if (ret == 0) {
+  if (ret == LnShield::ENONE) {
     op_normal();
+    uint64_t msat = sLn.getLastMsat();
+    if (msat != UINT64_MAX) {
+      if (our_msat != msat) {
+        our_msat = msat;
+        beep(1);
+        beep(7);
+        beep(1);
+      }
+    }
   } else {
     op_halt_error(ret, 0);
   }
@@ -120,7 +130,7 @@ void loop() {
 //    } else {
 //      op_halt_error(ret, 5);
 //    }
-    sLn.cmdInvoice(1000);
+    sLn.cmdInvoice(2000);
     button++;
   }
 

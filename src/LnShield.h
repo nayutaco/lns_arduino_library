@@ -52,6 +52,13 @@ public:
     Status_t getStatus() const { return mStatus; }
 
 
+    /** latest lightning amount_msat
+     *
+     * @retval  UINT64_MAX      yet updated on startup
+     */
+    uint64_t getLastMsat() const { return mOurMsat; }
+
+
     /********************************************************************
      * command: Bitcoin
      ********************************************************************/
@@ -114,7 +121,7 @@ public:
     Err_t cmdStop();
 
 
-    /** 着金確認
+    /** 定常確認
      *
      * @return  エラー
      */
@@ -139,6 +146,7 @@ private:
     Status_t            mStatus;
     int                 mPinOE;             ///< OutputEnable
     uint8_t             mWorkBuf[64];       ///< 作業バッファ
+    uint64_t            mOurMsat;           ///< pollingで取得したmsat
 };
 
 #endif  //LN_SHIELD_H_

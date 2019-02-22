@@ -85,7 +85,7 @@ namespace {
  ********************************************************************/
 
 LnShield::LnShield(int pinOutputEnable)
-    : mPinOE(pinOutputEnable), mStatus(STAT_STARTUP)
+    : mPinOE(pinOutputEnable), mStatus(STAT_STARTUP), mOurMsat(UINT64_MAX)
 {
 }
 
@@ -252,6 +252,9 @@ LnShield::Err_t LnShield::cmdPolling()
     case STAT_INITED:
         //定常状態
         err = uartSendCmd(CMD_POLL, 0, 0, &recv_len);
+        if (err == ENONE) {
+            mOurMsat = getBe64_(mWorkBuf);
+        }
         break;
     default:
         break;
