@@ -1,11 +1,21 @@
 #include <LnShield.h>
 
-#define PIN_OE          (4)
-#define PIN_LED_RED     (5)   //赤
-#define PIN_BTN         (6)   //
-#define PIN_LED_GRN     (7)   //緑
-#define PIN_BUZZ        (12)  // 圧電スピーカを接続したピン番号
-#define PIN_LED_ERR     (13)  //Arduino UNO上のLED(異常検知)
+//Rpi board
+#define PIN_RX          (0)   //UART
+#define PIN_TX          (1)   //UART
+#define PIN_OE          (4)   //UART Output Enable(use in library)
+
+//debug board
+#define PIN_LED_RED     (5)   //赤LED
+#define PIN_BTN         (6)   //button
+#define PIN_LED_GRN     (7)   //緑LED
+#define PIN_BUZZ        (9)   // 圧電スピーカを接続したピン番号
+
+//unused
+#define PIN_D10         (10)  //SPI:SS
+#define PIN_D11         (11)  //SPI:MOSI
+#define PIN_D12         (12)  //SPI:MISO
+#define PIN_D13         (13)  //SPI:SCK
 
 #define BUTTON_LIMIT    (20)
 
@@ -75,9 +85,11 @@ namespace {
 }
 
 void setup() {
-  beep(4);
-  beep(5);
-  beep(6);
+  for (int i=0; i<3; i++) {
+    beep(4, 100);
+    beep(5, 100);
+    beep(6, 100);
+  }
   sStat = ST_INIT;
   pinMode(PIN_BTN, INPUT);
   pinMode(PIN_LED_RED, OUTPUT);
