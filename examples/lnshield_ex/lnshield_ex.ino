@@ -23,7 +23,7 @@ namespace {
   LnShield sLn(PIN_OE);
   int sPrevStat = -1;
   int button = 0;
-  uint64_t our_msat = UINT64_MAX;
+  uint64_t local_msat = UINT64_MAX;
 
   enum Stat_t {
     ST_INIT,
@@ -91,7 +91,7 @@ void setup() {
     beep(6, 100);
   }
   sStat = ST_INIT;
-  pinMode(PIN_BTN, INPUT);
+  pinMode(PIN_BTN, INPUT_PULLUP);
   pinMode(PIN_LED_RED, OUTPUT);
   pinMode(PIN_LED_GRN, OUTPUT);
   digitalWrite(PIN_LED_RED, LOW);
@@ -114,8 +114,8 @@ void loop() {
     op_normal();
     uint64_t msat = sLn.getLastMsat();
     if (msat != UINT64_MAX) {
-      if (our_msat != msat) {
-        our_msat = msat;
+      if (local_msat != msat) {
+        local_msat = msat;
         beep(1);
         beep(7);
         beep(1);
@@ -125,7 +125,7 @@ void loop() {
     op_halt_error(ret, 0);
   }
 
-  if (digitalRead(PIN_BTN) != 0) {
+  if (digitalRead(PIN_BTN) == 0) {
     if (button < BUTTON_LIMIT) {
       button++;
     }

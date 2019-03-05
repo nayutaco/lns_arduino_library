@@ -56,7 +56,7 @@ public:
      *
      * @retval  UINT64_MAX      yet updated on startup
      */
-    uint64_t getLastMsat() const { return mOurMsat; }
+    uint64_t getLastMsat() const { return mLocalMsat; }
 
 
     /********************************************************************
@@ -146,7 +146,7 @@ private:
     Status_t            mStatus;
     int                 mPinOE;             ///< OutputEnable
     uint8_t             mWorkBuf[64];       ///< 作業バッファ
-    uint64_t            mOurMsat;           ///< pollingで取得したmsat
+    uint64_t            mLocalMsat;         ///< pollingで取得したmsat
 };
 
 #endif  //LN_SHIELD_H_
