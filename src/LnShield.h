@@ -14,7 +14,7 @@ public:
         STAT_HANDSHAKE1,
         STAT_HANDSHAKE2,
         STAT_HANDSHAKE3,
-        STAT_INITED,            //定常状態
+        STAT_NORMAL,            //定常状態
     };
 
     enum Err_t {

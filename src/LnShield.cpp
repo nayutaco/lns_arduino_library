@@ -127,7 +127,7 @@ LnShield::Err_t LnShield::init()
 
 LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 {
-    if (mStatus != STAT_INITED) {
+    if (mStatus != STAT_NORMAL) {
         return EDISABLED;
     }
 
@@ -148,7 +148,7 @@ LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 
 LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 {
-    if (mStatus != STAT_INITED) {
+    if (mStatus != STAT_NORMAL) {
         return EDISABLED;
     }
 
@@ -165,7 +165,7 @@ LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 
 LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 {
-    if (mStatus != STAT_INITED) {
+    if (mStatus != STAT_NORMAL) {
         return EDISABLED;
     }
 
@@ -182,7 +182,7 @@ LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 {
     return EDISABLED;
-    // if (mStatus != STAT_INITED) {
+    // if (mStatus != STAT_NORMAL) {
     //     return EDISABLED;
     // }
 
@@ -207,7 +207,7 @@ LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 
 LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat)
 {
-    if (mStatus != STAT_INITED) {
+    if (mStatus != STAT_NORMAL) {
         return EDISABLED;
     }
 
@@ -249,7 +249,7 @@ LnShield::Err_t LnShield::cmdPolling()
         err = handshake();
         break;
 
-    case STAT_INITED:
+    case STAT_NORMAL:
         //定常状態
         err = uartSendCmd(CMD_POLL, 0, 0, &recv_len);
         if (err == ENONE) {
@@ -266,7 +266,7 @@ LnShield::Err_t LnShield::cmdPolling()
 
 LnShield::Err_t LnShield::cmdEpaper(const char str[])
 {
-    if (mStatus != STAT_INITED) {
+    if (mStatus != STAT_NORMAL) {
         return EDISABLED;
     }
     
@@ -328,7 +328,9 @@ LnShield::Err_t LnShield::handshake()
         }
         if (lp == sizeof(INITRD)) {
             Serial.write(INITWT, sizeof(INITWT));
-            mStatus = STAT_INITED;
+            mStatus = STAT_NORMAL;
+            // local_msatの更新
+            err = cmdPolling();
         } else {
             mStatus = STAT_STARTING;
             err = EINVALID_RES;
