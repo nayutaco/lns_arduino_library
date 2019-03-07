@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 
-enum NeoPixelLedType_t{
+enum NeoPixelLedType_t {
     NEOPIXEL_LED_WAIT,
     NEOPIXEL_LED_INITED,
     NEOPIXEL_LED_NORMAL,
