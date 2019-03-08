@@ -13,6 +13,7 @@ enum DbgBoardBuzzerType_t {
     DBGBOARD_BUZZER_CHGSTAT,
     DBGBOARD_BUZZER_INVOICE,
     DBGBOARD_BUZZER_GET,
+    DBGBOARD_BUZZER_PAY,
     DBGBOARD_BUZZER_ERROR,
 };
 
@@ -21,6 +22,5 @@ void dbgboard_setup();
 void dbgboard_led(DbgBoardLedType_t Type);
 void dbgboard_buzzer(DbgBoardBuzzerType_t Type);
 bool dbgboard_button();
-void dbgboard_heartbeat(uint16_t Blink);
 
 #endif /* DBGBOARD_H__ */

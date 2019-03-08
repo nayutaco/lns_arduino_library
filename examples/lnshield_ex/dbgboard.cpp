@@ -11,6 +11,7 @@ static void beep(int num);
 
 
 static int mButtonCnt;
+static int mBlink;
 
 
 void dbgboard_setup()
@@ -23,8 +24,6 @@ void dbgboard_setup()
 
 void dbgboard_led(DbgBoardLedType_t Type)
 {
-    static int led = 0;
-
     switch (Type) {
     case DBGBOARD_LED_INIT:
         digitalWrite(PIN_LED_RED, HIGH);
@@ -32,17 +31,25 @@ void dbgboard_led(DbgBoardLedType_t Type)
         break;
 
     case DBGBOARD_LED_WAIT:
-        digitalWrite(PIN_LED_RED, HIGH);
+        digitalWrite(PIN_LED_RED, LOW);
         digitalWrite(PIN_LED_GRN, LOW);
         break;
 
+    case DBGBOARD_LED_NORMAL:
+        if ((mBlink / 10) % 2) {
+            digitalWrite(PIN_LED_GRN, LOW);
+        } else {
+            digitalWrite(PIN_LED_GRN, HIGH);
+        }
+        break;
+
     case DBGBOARD_LED_ERROR:
-        digitalWrite(PIN_LED_RED, led);
-        digitalWrite(PIN_LED_GRN, led ^ 1);
-        led ^= 1;
+        digitalWrite(PIN_LED_RED, mBlink & 1);
+        digitalWrite(PIN_LED_GRN, !(mBlink & 1));
         break;
     }
 
+    mBlink++;
 }
 
 
@@ -50,7 +57,7 @@ void dbgboard_buzzer(DbgBoardBuzzerType_t Type)
 {
     switch (Type) {
     case DBGBOARD_BUZZER_INIT:
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 2; i++) {
             beep(4, 100);
             beep(5, 100);
             beep(6, 100);
@@ -68,6 +75,12 @@ void dbgboard_buzzer(DbgBoardBuzzerType_t Type)
     case DBGBOARD_BUZZER_GET:
         beep(4, 100);
         beep(7, 200);
+        break;
+
+    case DBGBOARD_BUZZER_PAY:
+        beep(1, 100);
+        beep(2, 200);
+        beep(1, 200);
         break;
 
     case DBGBOARD_BUZZER_ERROR:
@@ -92,16 +105,6 @@ bool dbgboard_button()
     }
 
     return ret;
-}
-
-
-void dbgboard_heartbeat(uint16_t Blink)
-{
-    if ((Blink / 10) % 2) {
-        digitalWrite(PIN_LED_GRN, LOW);
-    } else {
-        digitalWrite(PIN_LED_GRN, HIGH);
-    }
 }
 
 

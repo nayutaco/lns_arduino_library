@@ -9,12 +9,14 @@ enum NeoPixelLedType_t {
     NEOPIXEL_LED_INITED,
     NEOPIXEL_LED_NORMAL,
     NEOPIXEL_LED_GET,
+    NEOPIXEL_LED_PAY,
+    NEOPIXEL_LED_ERROR,
 };
 
 
 void neopixel_setup();
 void neopixel_clear();
-NeoPixelLedType_t neopixel_led(uint16_t Blink, NeoPixelLedType_t Type);
+NeoPixelLedType_t neopixel_led(NeoPixelLedType_t Type);
 
 
 void neopixel_wipe(int ColIdx);

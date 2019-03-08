@@ -10,6 +10,7 @@
 
 
 static Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_NEOPIXEL, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
+static int mBlink;
 
 static uint32_t Wheel(byte WheelPos);
 static uint32_t index2color(int Index);
@@ -37,13 +38,13 @@ void neopixel_clear()
 }
 
 
-NeoPixelLedType_t neopixel_led(uint16_t Blink, NeoPixelLedType_t Type)
+NeoPixelLedType_t neopixel_led(NeoPixelLedType_t Type)
 {
     bool ret;
 
     switch (Type) {
     case NEOPIXEL_LED_WAIT:
-        neopixel_wipe(((Blink / NUM_NEOPIXEL) % 3), Blink);
+        neopixel_wipe((mBlink / NUM_NEOPIXEL) % 3, mBlink);
         break;
     case NEOPIXEL_LED_INITED:
         neopixel_clear();
@@ -51,16 +52,27 @@ NeoPixelLedType_t neopixel_led(uint16_t Blink, NeoPixelLedType_t Type)
         break;
     case NEOPIXEL_LED_NORMAL:
         //none
-        neopixel_wipe(((Blink / NUM_NEOPIXEL) % 3) + 3, Blink);
+        neopixel_wipe(((mBlink / NUM_NEOPIXEL) % 3) + 3, mBlink);
         break;
     case NEOPIXEL_LED_GET:
         ret = neopixel_rainbow();
         if (ret) {
             neopixel_clear();
-            Type = 2;
+            Type = NEOPIXEL_LED_NORMAL;
         }
         break;
+    case NEOPIXEL_LED_PAY:
+        ret = neopixel_rainbow();
+        if (ret) {
+            neopixel_clear();
+            Type = NEOPIXEL_LED_NORMAL;
+        }
+        break;
+    case NEOPIXEL_LED_ERROR:
+        neopixel_wipe(mBlink % 2);
+        break;
     }
+    mBlink++;
     return Type;
 }
 
@@ -90,8 +102,25 @@ bool neopixel_rainbow()
         strip.show();
     }
     bool ret = false;
-    j += 8;
+    j += 4;
     if (j >= 256) {
+        j = 0;
+        ret = true;
+    }
+    return ret;
+}
+
+bool neopixel_rainbow_cycle()
+{
+    static uint16_t j;
+
+    for (int i = 0; i < strip.numPixels(); i++) {
+        strip.setPixelColor(i, Wheel(((i * 256 / strip.numPixels()) + j) & 255));
+        strip.show();
+    }
+    bool ret = false;
+    j += 8;
+    if (j >= 256*5) {
         j = 0;
         ret = true;
     }
@@ -122,6 +151,9 @@ static uint32_t index2color(int Index)
     uint32_t color;
 
     switch (Index) {
+    case 0:
+        color = strip.Color(255, 0, 0);
+        break;
     case 1:
         color = strip.Color(0, 255, 0);
         break;
@@ -138,7 +170,7 @@ static uint32_t index2color(int Index)
         color = strip.Color(0, 0, 8);
         break;
     default:
-        color = strip.Color(255, 0, 0);
+        color = strip.Color(255, 255, 255);
         break;
     }
     return color;

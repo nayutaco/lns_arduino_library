@@ -1,35 +1,35 @@
+#define USE_SOFTWARESERIAL
+
 #include <LnShield.h>
 #include "board.h"
 
 #include "dbgboard.h"
 #include "neopixel.h"
 
+#ifdef USE_SOFTWARESERIAL
+#include <SoftwareSerial.h>
+#endif  //USE_SOFTWARESERIAL
 
 namespace {
-  LnShield sLn(PIN_OE);
-  int sPrevStat = -1;
-  uint64_t local_msat = UINT64_MAX;
+  LnShield sLn(PIN_OE);   //LightningNetwork Shield
 
-  void op_normal(int stat)
-  {
-    if (stat != sPrevStat) {
-      dbgboard_buzzer(DBGBOARD_BUZZER_CHGSTAT);
-      sPrevStat = stat;
-    }
-  }
+  int prevStat = -1;
+  uint64_t localMsat = UINT64_MAX;
+  NeoPixelLedType_t neoStat = NEOPIXEL_LED_WAIT;
 
-  void op_halt_error(int err)
-  {
-    dbgboard_buzzer(DBGBOARD_BUZZER_ERROR);
-    while (true) {
-      Serial.write(err);
-      dbgboard_led(DBGBOARD_LED_ERROR);
-      delay(200);
-    }
-  }
+#ifdef USE_SOFTWARESERIAL
+  SoftwareSerial dbgSerial(10, 11); //RX, TX
+  #define DBG_BEGIN()     dbgSerial.begin(115200)
+  #define DBG_PRINTLN(a)  dbgSerial.println(a)
+#else
+  #define DBG_BEGIN()     //none
+  #define DBG_PRINTLN(a)  //none
+#endif  //USE_SOFTWARESERIAL
 }
 
 void setup() {
+  DBG_BEGIN();
+  DBG_PRINTLN("begin");
   dbgboard_setup();
   neopixel_setup();
 
@@ -41,47 +41,65 @@ void setup() {
 
 
 void loop() {
-  static uint16_t led_blink = 0;
-  static LnShield::Status_t ptarm_stat = LnShield::STAT_STARTUP;
-  static NeoPixelLedType_t neo_stat = NEOPIXEL_LED_WAIT;
-
   int ret = sLn.cmdPolling();
   if (ret != LnShield::ENONE) {
-    op_halt_error(ret);
+    dbgboard_buzzer(DBGBOARD_BUZZER_ERROR);
+    DBG_PRINTLN("error");
+    DBG_PRINTLN(ret);
+    while (true) {
+      Serial.write(ret);
+      dbgboard_led(DBGBOARD_LED_ERROR);
+      neopixel_led(NEOPIXEL_LED_ERROR);
+      delay(200);
+    }
+    //no return
   }
 
   int stat = sLn.getStatus();
-  op_normal(stat);
-
-  uint64_t msat = sLn.getLastMsat();
-  float flocal_msat = (float)local_msat;
-  float fmsat = (float)msat;
-  
-  if ((ptarm_stat == LnShield::STAT_NORMAL) && (msat != UINT64_MAX) && (local_msat != msat)) {
-    neo_stat = NEOPIXEL_LED_GET;
-    dbgboard_buzzer(DBGBOARD_BUZZER_GET);
+  if (stat != prevStat) {
+    dbgboard_buzzer(DBGBOARD_BUZZER_CHGSTAT);
   }
-  local_msat = msat;
+  if (stat != LnShield::STAT_NORMAL) {
+    //wait normal status
+    neoStat = NEOPIXEL_LED_WAIT;
+    DBG_PRINTLN("wait");
+  } else if (prevStat != LnShield::STAT_NORMAL) {
+    //changed to normal status
+    neoStat = NEOPIXEL_LED_INITED;
+    localMsat = sLn.getLastMsat();   //can receive localMsat
+    DBG_PRINTLN("to normal");
+  }
+  prevStat = stat;
 
-  bool on = dbgboard_button();
-  if (on) {
-    dbgboard_buzzer(DBGBOARD_BUZZER_INVOICE);
-    sLn.cmdInvoice(2000);
+  if (stat == LnShield::STAT_NORMAL) {
+    //amount_msat
+    uint64_t msat = sLn.getLastMsat();
+    if ((msat != UINT64_MAX) && (localMsat != msat)) {
+      DBG_PRINTLN("change msat");
+      //change localMsat
+      if (msat > localMsat) {
+        neoStat = NEOPIXEL_LED_GET;
+        dbgboard_buzzer(DBGBOARD_BUZZER_GET);
+      } else {
+        neoStat = NEOPIXEL_LED_PAY;
+        dbgboard_buzzer(DBGBOARD_BUZZER_PAY);
+      }
+    }
+    localMsat = msat;
+
+    //button
+    bool on = dbgboard_button();
+    if (on) {
+      dbgboard_buzzer(DBGBOARD_BUZZER_INVOICE);
+      sLn.cmdInvoice(2000);
+    }
   }
 
-  //heartbeat
-  dbgboard_heartbeat(led_blink);
-
-  if (sLn.getStatus() != LnShield::STAT_NORMAL) {
-    neo_stat = NEOPIXEL_LED_WAIT;
-  } else if (ptarm_stat != LnShield::STAT_NORMAL) {
-    neo_stat = NEOPIXEL_LED_INITED;
+  dbgboard_led(DBGBOARD_LED_NORMAL);
+  if (neoStat != NEOPIXEL_LED_NORMAL) {
+    DBG_PRINTLN("led!");
   }
-  neo_stat = neopixel_led(led_blink, neo_stat);
-  led_blink++;
-
-  ptarm_stat = sLn.getStatus();
+  neoStat = neopixel_led(neoStat);
 
   delay(100);
 }
-
