@@ -1,4 +1,5 @@
-#define USE_SOFTWARESERIAL
+//#define USE_SOFTWARESERIAL
+//#define USE_NEOPIXEL
 
 #include <LnShield.h>
 #include "board.h"
@@ -31,7 +32,10 @@ void setup() {
   DBG_BEGIN();
   DBG_PRINTLN("begin");
   dbgboard_setup();
+#ifdef USE_NEOPIXEL
   neopixel_setup();
+  neopixel_led(NEOPIXEL_LED_START);
+#endif
 
   dbgboard_led(DBGBOARD_LED_INIT);
   dbgboard_buzzer(DBGBOARD_BUZZER_INIT);
@@ -49,7 +53,9 @@ void loop() {
     while (true) {
       Serial.write(ret);
       dbgboard_led(DBGBOARD_LED_ERROR);
+#ifdef USE_NEOPIXEL
       neopixel_led(NEOPIXEL_LED_ERROR);
+#endif
       delay(200);
     }
     //no return
@@ -99,7 +105,9 @@ void loop() {
   if (neoStat != NEOPIXEL_LED_NORMAL) {
     DBG_PRINTLN("led!");
   }
+#ifdef USE_NEOPIXEL
   neoStat = neopixel_led(neoStat);
+#endif
 
   delay(100);
 }

@@ -7,6 +7,8 @@
 
 
 #define NUM_NEOPIXEL    (16)
+//#define NUM_NEOPIXEL    (144)
+#define LED_DARK        (3)
 
 
 static Adafruit_NeoPixel strip = Adafruit_NeoPixel(NUM_NEOPIXEL, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
@@ -43,6 +45,14 @@ NeoPixelLedType_t neopixel_led(NeoPixelLedType_t Type)
     bool ret;
 
     switch (Type) {
+    case NEOPIXEL_LED_START:
+        for (int lp = 0; lp < 30; lp++) {
+            for (int led = 0; led < 3; led++) {
+                neopixel_wipe(led);
+                delay(100);
+            }
+        }
+        break;
     case NEOPIXEL_LED_WAIT:
         neopixel_wipe((mBlink / NUM_NEOPIXEL) % 3, mBlink);
         break;
@@ -52,7 +62,18 @@ NeoPixelLedType_t neopixel_led(NeoPixelLedType_t Type)
         break;
     case NEOPIXEL_LED_NORMAL:
         //none
-        neopixel_wipe(((mBlink / NUM_NEOPIXEL) % 3) + 3, mBlink);
+#if 1
+        //neopixel_rainbow_cycle();
+        if ((mBlink % 160) == 0) {
+            neopixel_clear();
+        }
+        neopixel_wipe(((mBlink / NUM_NEOPIXEL) % 4) + LED_DARK, mBlink);
+#else
+        neopixel_wipe_noshow(((mBlink / NUM_NEOPIXEL) % 3) + LED_DARK, mBlink);
+        mBlink++;
+        neopixel_wipe_noshow(((mBlink / NUM_NEOPIXEL) % 3) + LED_DARK, mBlink);
+        strip.show();
+#endif
         break;
     case NEOPIXEL_LED_GET:
         ret = neopixel_rainbow();
@@ -62,7 +83,7 @@ NeoPixelLedType_t neopixel_led(NeoPixelLedType_t Type)
         }
         break;
     case NEOPIXEL_LED_PAY:
-        ret = neopixel_rainbow();
+        ret = neopixel_rainbow_cycle();
         if (ret) {
             neopixel_clear();
             Type = NEOPIXEL_LED_NORMAL;
@@ -88,9 +109,14 @@ void neopixel_wipe(int ColIdx)
 
 void neopixel_wipe(int ColIdx, uint16_t Index)
 {
+    neopixel_wipe_noshow(ColIdx, Index);
+    strip.show();
+}
+
+void neopixel_wipe_noshow(int ColIdx, uint16_t Index)
+{
     uint32_t c = index2color(ColIdx);
     strip.setPixelColor(Index % strip.numPixels(), c);
-    strip.show();
 }
 
 bool neopixel_rainbow()
@@ -99,10 +125,10 @@ bool neopixel_rainbow()
 
     for (int i = 0; i < strip.numPixels(); i++) {
         strip.setPixelColor(i, Wheel((i + j) & 255));
-        strip.show();
     }
+    strip.show();
     bool ret = false;
-    j += 4;
+    j += 2;
     if (j >= 256) {
         j = 0;
         ret = true;
@@ -119,14 +145,13 @@ bool neopixel_rainbow_cycle()
         strip.show();
     }
     bool ret = false;
-    j += 8;
-    if (j >= 256*5) {
+    j += 4;
+    if (j >= 256*20) {
         j = 0;
         ret = true;
     }
     return ret;
 }
-
 
 
 // Input a value 0 to 255 to get a color value.
@@ -135,43 +160,42 @@ static uint32_t Wheel(byte WheelPos)
 {
     WheelPos = 255 - WheelPos;
     if (WheelPos < 85) {
-        return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+        return strip.Color((255 - WheelPos * 3), 0, (WheelPos * 3) >> 1);
     }
     if (WheelPos < 170) {
         WheelPos -= 85;
-        return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+        return strip.Color(0, (WheelPos * 3), (255 - WheelPos * 3) >> 1);
     }
     WheelPos -= 170;
-    return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+    return strip.Color((WheelPos * 3) >> 1, (255 - WheelPos * 3), 0);
 }
 
 
 static uint32_t index2color(int Index)
 {
-    uint32_t color;
+    uint8_t r = 0, g = 0, b = 0;
 
     switch (Index) {
     case 0:
-        color = strip.Color(255, 0, 0);
+        r = 127;
         break;
     case 1:
-        color = strip.Color(0, 255, 0);
+        g = 127;
         break;
     case 2:
-        color = strip.Color(0, 0, 255);
+        b = 127;
         break;
     case 3:
-        color = strip.Color(8, 0, 0);
+        r = 7;
         break;
     case 4:
-        color = strip.Color(0, 8, 0);
+        g = 7;
         break;
     case 5:
-        color = strip.Color(0, 0, 8);
+        b = 7;
         break;
     default:
-        color = strip.Color(255, 255, 255);
         break;
     }
-    return color;
+    return strip.Color(r, g, b);
 }
