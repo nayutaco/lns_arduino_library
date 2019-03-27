@@ -35,6 +35,10 @@ public:
         EINVALID_RES,           ///< シールドからの応答が不正
         EPROCESSING,            ///< 処理中
     };
+    typedef void (*LnShieldFuncChangeStatus_t)(LnShield::Status_t);
+    typedef void (*LnShieldFuncChangeMsat_t)(uint64_t);
+    typedef void (*LnShieldFuncError_t)(void);
+
 
 public:
     LnShield(int pinOutputEnable);
@@ -57,6 +61,40 @@ public:
      * @retval  UINT64_MAX      yet updated on startup
      */
     uint64_t getLastMsat() const { return mLocalMsat; }
+
+
+    /********************************************************************
+     * event loop for easy to use
+     ********************************************************************/
+
+    /** initialize event loop
+     *
+     * @param[in]   cbChangeStatus  callback function on change status
+     * @param[in]   cbChangeMsat    callback function on change local_msat
+     * @param[in]   cbError         callback function on error
+     */
+    void LnShield::easyEventInit(
+            LnShieldFuncChangeStatus_t cbChangeStatus,
+            LnShieldFuncChangeMsat_t cbChangeMsat,
+            LnShieldFuncError_t cbError);
+
+
+    /** eventloop process
+     *
+     * @attention
+     *  - call this function within 60sec for Raspberry Pi
+     *      - Raspberry Pi check polling UART command elapse
+     */
+    void easyEventLoop();
+
+
+    /** request display invoice
+     *
+     * @param[in]   amountMsat      request msat
+     * @note
+     *  - UART command send in easyEventLoop()
+     */
+    void easyEventRequestInvoice(uint64_t amountMsat);
 
 
     /********************************************************************
@@ -121,9 +159,12 @@ public:
     Err_t cmdStop();
 
 
-    /** 定常確認
+    /** send polling UART command
      *
-     * @return  エラー
+     * @return  error
+     * @attention
+     *  - call this function within 60sec for Raspberry Pi
+     *      - Raspberry Pi check polling UART command elapse
      */
     Err_t cmdPolling();
 
@@ -147,6 +188,15 @@ private:
     int                 mPinOE;             ///< OutputEnable
     uint8_t             mWorkBuf[64];       ///< 作業バッファ
     uint64_t            mLocalMsat;         ///< pollingで取得したmsat
+
+
+    Status_t            mEvtStat;
+    Status_t            mEvtPrevStat;
+    uint64_t            mEvtLocalMsat;
+    uint64_t            mEvtInvoice;
+    LnShieldFuncChangeStatus_t  mEvtCbChangeStatus;
+    LnShieldFuncChangeMsat_t    mEvtCbChangeMsat;
+    LnShieldFuncError_t         mEvtCbError;
 };
 
 #endif  //LN_SHIELD_H_

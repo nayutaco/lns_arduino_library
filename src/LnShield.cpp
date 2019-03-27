@@ -5,7 +5,7 @@
 
 
 /********************************************************************
- * 
+ *
  ********************************************************************/
 
 namespace
@@ -31,30 +31,35 @@ namespace
  * local functions
  ********************************************************************/
 
-namespace {
-    uint16_t getBe16_(const uint8_t *pData) {
+namespace
+{
+    uint16_t getBe16_(const uint8_t *pData)
+    {
         return ((uint16_t)pData[0] << 8) | (uint16_t)pData[1];
     }
 
-    uint64_t getBe32_(const uint8_t *pData) {
-        return  ((uint32_t)pData[0] << 24) |
-                ((uint32_t)pData[1] << 16) |
-                ((uint32_t)pData[2] <<  8) |
-                 (uint32_t)pData[3];
+    uint64_t getBe32_(const uint8_t *pData)
+    {
+        return ((uint32_t)pData[0] << 24) |
+               ((uint32_t)pData[1] << 16) |
+               ((uint32_t)pData[2] <<  8) |
+               (uint32_t)pData[3];
     }
 
-    uint64_t getBe64_(const uint8_t *pData) {
-        return  ((uint64_t)pData[0] << 56) |
-                ((uint64_t)pData[1] << 48) |
-                ((uint64_t)pData[2] << 40) |
-                ((uint64_t)pData[3] << 32) |
-                ((uint64_t)pData[4] << 24) |
-                ((uint64_t)pData[5] << 16) |
-                ((uint64_t)pData[6] <<  8) |
-                 (uint64_t)pData[7];
+    uint64_t getBe64_(const uint8_t *pData)
+    {
+        return ((uint64_t)pData[0] << 56) |
+               ((uint64_t)pData[1] << 48) |
+               ((uint64_t)pData[2] << 40) |
+               ((uint64_t)pData[3] << 32) |
+               ((uint64_t)pData[4] << 24) |
+               ((uint64_t)pData[5] << 16) |
+               ((uint64_t)pData[6] <<  8) |
+               (uint64_t)pData[7];
     }
 
-    void setBe16_(uint8_t *pData, uint16_t Value) {
+    void setBe16_(uint8_t *pData, uint16_t Value)
+    {
         uint16_t mask = 0xff;
         for (size_t lp = 0; lp < sizeof(Value); lp++) {
             pData[sizeof(Value) - lp - 1] = (uint8_t)((Value & mask) >> (8 * lp));
@@ -62,7 +67,8 @@ namespace {
         }
     }
 
-    void setBe32_(uint8_t *pData, uint32_t Value) {
+    void setBe32_(uint8_t *pData, uint32_t Value)
+    {
         uint32_t mask = 0xff;
         for (size_t lp = 0; lp < sizeof(Value); lp++) {
             pData[sizeof(Value) - lp - 1] = (uint8_t)((Value & mask) >> (8 * lp));
@@ -70,7 +76,8 @@ namespace {
         }
     }
 
-    void setBe64_(uint8_t *pData, uint64_t Value) {
+    void setBe64_(uint8_t *pData, uint64_t Value)
+    {
         uint64_t mask = 0xff;
         for (size_t lp = 0; lp < sizeof(Value); lp++) {
             pData[sizeof(Value) - lp - 1] = (uint8_t)((Value & mask) >> (8 * lp));
@@ -269,7 +276,7 @@ LnShield::Err_t LnShield::cmdEpaper(const char str[])
     if (mStatus != STAT_NORMAL) {
         return EDISABLED;
     }
-    
+
     size_t len = strlen(str);
     if (len > 384) {
         return EINVALID_PARAM;
@@ -281,6 +288,70 @@ LnShield::Err_t LnShield::cmdEpaper(const char str[])
     delay(100);
 
     return err;
+}
+
+
+void LnShield::easyEventInit(
+    LnShieldFuncChangeStatus_t cbChangeStatus,
+    LnShieldFuncChangeMsat_t cbChangeMsat,
+    LnShieldFuncError_t cbError)
+{
+    mEvtStat = (Status_t) -1;
+    mEvtPrevStat = (Status_t) -1;
+    mEvtLocalMsat = UINT64_MAX;
+    mEvtInvoice = 0;
+
+    mEvtCbChangeStatus = cbChangeStatus;
+    mEvtCbChangeMsat = cbChangeMsat;
+    mEvtCbError = cbError;
+
+    pinMode(7, OUTPUT);
+}
+
+
+void LnShield::easyEventLoop()
+{
+    Err_t ret = cmdPolling();
+    if (ret != ENONE) {
+        while (true) {
+            Serial.write(ret);
+            if (mEvtCbError != 0) {
+                (*mEvtCbError)();
+            }
+            delay(50);
+        }
+        //no return
+    }
+
+    mEvtStat = getStatus();
+    if (mEvtStat != mEvtPrevStat) {
+        if (mEvtCbChangeStatus != 0) {
+            (*mEvtCbChangeStatus)(mEvtStat);
+        }
+    }
+    mEvtPrevStat = mEvtStat;
+
+    if (mEvtInvoice != 0) {
+        cmdInvoice(mEvtInvoice);
+        mEvtInvoice = 0;
+    }
+
+    if (mEvtStat == STAT_NORMAL) {
+        //amount_msat
+        uint64_t msat = getLastMsat();
+        if ((msat != UINT64_MAX) && (mEvtLocalMsat != msat)) {
+            if (mEvtCbChangeMsat != 0) {
+                (*mEvtCbChangeMsat)(msat);
+            }
+        }
+        mEvtLocalMsat = msat;
+    }
+}
+
+
+void LnShield::easyEventRequestInvoice(uint64_t amountMsat)
+{
+    mEvtInvoice = amountMsat;
 }
 
 
