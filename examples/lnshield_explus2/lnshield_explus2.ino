@@ -15,7 +15,7 @@ namespace {
 
 
 //////////////////////////////////////////////////////////////
-static Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
+static Adafruit_NeoPixel strip = Adafruit_NeoPixel(144, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 static int ledCount;
 
 static void colorWipe(uint32_t c, uint8_t wait);
@@ -23,7 +23,7 @@ static void colorWipe(uint32_t c, uint8_t wait);
 
 //////////////////////////////////////////////////////////////
 
-static void callbackChangeStatus(LnShield::Status_t Status)
+static void callbackChangeStatus(LnShield::UserStatus_t Status)
 {
   dbgboard_buzzer(DBGBOARD_BUZZER_CHGSTAT);
 }
@@ -31,9 +31,10 @@ static void callbackChangeStatus(LnShield::Status_t Status)
 
 static void callbackChangeMsat(uint64_t amountMsat)
 {
-  for (int i=0; i<3; i++) {
-    neopixelBlink(strip.Color(255, 0, 0), 50); // Red
-    neopixelBlink(strip.Color(0, 0, 0), 50); // turn off
+  dbgboard_buzzer(DBGBOARD_BUZZER_GET);
+  for (int i=0; i<5; i++) {
+    neopixelBlink(strip.Color(191, 191, 0), 50); // Yellow
+    neopixelBlink(strip.Color(0, 0, 63), 50); // Blue
   }
 }
 
@@ -41,7 +42,7 @@ static void callbackChangeMsat(uint64_t amountMsat)
 static void callbackError()
 {
   dbgboard_led(DBGBOARD_LED_ERROR);
-  colorWipe(strip.Color(80, 0, 40), 0);
+  colorWipe(strip.Color(64, 0, 0), 0);
   colorWipe(strip.Color(0, 0, 0), 0);
 }
 
@@ -70,17 +71,17 @@ void loop() {
   if (on) {
     dbgboard_buzzer(DBGBOARD_BUZZER_INVOICE);
     sLn.easyEventRequestInvoice(2000);
-    colorWipe(strip.Color(80, 0, 255), 0); // Blue
+    colorWipe(strip.Color(0, 0, 192), 0);
     colorWipe(strip.Color(0, 0, 0), 0); // turn off
   }
   dbgboard_led(DBGBOARD_LED_NORMAL);
   
   ledCount++;
   if ((ledCount % 20) == 0) {
-    colorWipe(strip.Color(20, 20, 0), 0);
+    colorWipe(strip.Color(0, 10, 0), 0);
     colorWipe(strip.Color(0, 0, 0), 0);
   }
-  sLn.easyEventLoop();
+  sLn.easyEventPoll();
 
   delay(100);
 }

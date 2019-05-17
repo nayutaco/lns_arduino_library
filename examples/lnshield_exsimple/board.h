@@ -12,10 +12,8 @@
 //debug board
 #define PIN_LED_RED     (5)   //赤LED
 #define PIN_BTN         (6)   //button
-#define PIN_LED_GRN     (7)   //緑LED
-#define PIN_BUZZ        (9)   // 圧電スピーカを接続したピン番号
 
-//unused
+//!!DO NOT USE!!
 #define PIN_D10         (10)  //SPI:SS
 #define PIN_D11         (11)  //SPI:MOSI
 #define PIN_D12         (12)  //SPI:MISO

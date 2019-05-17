@@ -3,7 +3,7 @@
 #include "board.h"
 #include "dbgboard.h"
 
-#define BUTTON_LIMIT    (20)
+#define BUTTON_LIMIT    (10)
 
 
 static void beep(int num, int beat);
@@ -74,7 +74,7 @@ void dbgboard_buzzer(DbgBoardBuzzerType_t Type)
 
     case DBGBOARD_BUZZER_GET:
         beep(4, 100);
-        beep(7, 200);
+        beep(7, 500);
         break;
 
     case DBGBOARD_BUZZER_PAY:

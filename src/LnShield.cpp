@@ -92,7 +92,7 @@ namespace
  ********************************************************************/
 
 LnShield::LnShield(int pinOutputEnable)
-    : mPinOE(pinOutputEnable), mStatus(STAT_STARTUP), mLocalMsat(UINT64_MAX)
+    : mPinOE(pinOutputEnable), mStatus(STAT_STARTUP), mLocalMsat(AMOUNT_INIT)
 {
 }
 
@@ -296,9 +296,8 @@ void LnShield::easyEventInit(
     LnShieldFuncChangeMsat_t cbChangeMsat,
     LnShieldFuncError_t cbError)
 {
-    mEvtStat = (Status_t) -1;
-    mEvtPrevStat = (Status_t) -1;
-    mEvtLocalMsat = UINT64_MAX;
+    mEvtPrevStat = (Status_t)-1;
+    mEvtLocalMsat = AMOUNT_INIT;
     mEvtInvoice = 0;
 
     mEvtCbChangeStatus = cbChangeStatus;
@@ -309,7 +308,7 @@ void LnShield::easyEventInit(
 }
 
 
-void LnShield::easyEventLoop()
+void LnShield::easyEventPoll()
 {
     Err_t ret = cmdPolling();
     if (ret != ENONE) {
@@ -323,23 +322,41 @@ void LnShield::easyEventLoop()
         //no return
     }
 
-    mEvtStat = getStatus();
-    if (mEvtStat != mEvtPrevStat) {
+    if (mStatus != mEvtPrevStat) {
         if (mEvtCbChangeStatus != 0) {
-            (*mEvtCbChangeStatus)(mEvtStat);
+            UserStatus_t user_stat;
+            switch (mStatus) {
+            case STAT_STARTUP:
+                user_stat = USERSTATUS_INIT;
+                break;
+            case STAT_STARTING:
+                user_stat = USERSTATUS_STARTING;
+                break;
+            case STAT_NORMAL:
+                user_stat = USERSTATUS_NORMAL;
+                break;
+            case STAT_HANDSHAKE1:
+            case STAT_HANDSHAKE2:
+            case STAT_HANDSHAKE3:
+            default:
+                user_stat = USERSTATUS_UNKNOWN;
+            }
+            if (user_stat != USERSTATUS_UNKNOWN) {
+                (*mEvtCbChangeStatus)(user_stat);
+            }
         }
+        mEvtPrevStat = mStatus;
     }
-    mEvtPrevStat = mEvtStat;
 
     if (mEvtInvoice != 0) {
         cmdInvoice(mEvtInvoice);
         mEvtInvoice = 0;
     }
 
-    if (mEvtStat == STAT_NORMAL) {
+    if (mStatus == STAT_NORMAL) {
         //amount_msat
         uint64_t msat = getLastMsat();
-        if ((msat != UINT64_MAX) && (mEvtLocalMsat != msat)) {
+        if ((msat != AMOUNT_INIT) && (mEvtLocalMsat != msat)) {
             if (mEvtCbChangeMsat != 0) {
                 (*mEvtCbChangeMsat)(msat);
             }
@@ -366,34 +383,38 @@ LnShield::Err_t LnShield::handshake()
 
     Err_t err = ENONE;
 
+    //0x55が現れるまで読み捨て
     if (mStatus == STAT_STARTING) {
         if (Serial.available() > 0) {
             uint8_t rd = Serial.read();
             if (rd == 0x55) {
                 mStatus = STAT_HANDSHAKE1;
-                delay(100);
+                //delay(100);
             }
         }
     }
+    //0x55以外が現れるまで読み捨て
     if (mStatus == STAT_HANDSHAKE1) {
         if (Serial.available() > 0) {
             uint8_t rd = Serial.read();
             if (rd != 0x55) {
                 mStatus = STAT_HANDSHAKE2;
-                delay(100);
+                //delay(100);
             }
         }
     }
     if (mStatus == STAT_HANDSHAKE2) {
         if (Serial.available() >= sizeof(INITRD)) {
             mStatus = STAT_HANDSHAKE3;
-            delay(100);
+            //delay(100);
         }
     }
     if (mStatus == STAT_HANDSHAKE3) {
         int lp = 0;
+        uint8_t rd;
         for (lp = 0; lp < sizeof(INITRD); lp++) {
-            if (Serial.read() != INITRD[lp]) {
+            rd = Serial.read();
+            if (rd != INITRD[lp]) {
                 break;
             }
         }
@@ -403,6 +424,8 @@ LnShield::Err_t LnShield::handshake()
             // local_msatの更新
             err = cmdPolling();
         } else {
+            Serial.write(lp);
+            Serial.write(rd);
             mStatus = STAT_STARTING;
             err = EINVALID_RES;
         }
