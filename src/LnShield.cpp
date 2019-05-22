@@ -1,8 +1,26 @@
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 #include <string.h>
 #include "LnShield.h"
 
+//#define M_USE_SERIALDBG
+#ifdef M_USE_SERIALDBG
+#include <SoftwareSerial.h>
+
+#define DBG_SOFTSERIAL_RX   (2)
+#define DBG_SOFTSERIAL_TX   (3)
+static SoftwareSerial       sDebug(DBG_SOFTSERIAL_RX, DBG_SOFTSERIAL_TX);
+
+#define DBG_INIT()          sDebug.begin(115200)
+#define DBG_PRINT(val)      sDebug.print(val)
+#define DBG_PRINTLN(val)    sDebug.println(val)
+
+#else   //M_USE_SERIALDBG
+
+#define DBG_INIT()          //none
+#define DBG_PRINT(val)      //none
+#define DBG_PRINTLN(val)    //none
+
+#endif  //M_USE_SERIALDBG
 
 /********************************************************************
  *
@@ -108,7 +126,11 @@ LnShield::~LnShield()
 
 LnShield::Err_t LnShield::init()
 {
+    DBG_INIT();
+    DBG_PRINTLN("begin");
+
     if (mStatus != STAT_STARTUP) {
+        DBG_PRINTLN("EALREADY_INIT");
         return EALREADY_INIT;
     }
 
@@ -135,6 +157,8 @@ LnShield::Err_t LnShield::init()
 LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 {
     if (mStatus != STAT_NORMAL) {
+        DBG_PRINTLN("cmdGetBalance");
+        DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
     }
 
@@ -156,6 +180,8 @@ LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 {
     if (mStatus != STAT_NORMAL) {
+        DBG_PRINTLN("cmdGetNewAddress");
+        DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
     }
 
@@ -173,6 +199,8 @@ LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 {
     if (mStatus != STAT_NORMAL) {
+        DBG_PRINTLN("cmdSetFeeRate");
+        DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
     }
 
@@ -215,6 +243,8 @@ LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat)
 {
     if (mStatus != STAT_NORMAL) {
+        DBG_PRINTLN("cmdInvoice");
+        DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
     }
 
@@ -274,11 +304,15 @@ LnShield::Err_t LnShield::cmdPolling()
 LnShield::Err_t LnShield::cmdEpaper(const char str[])
 {
     if (mStatus != STAT_NORMAL) {
+        DBG_PRINTLN("cmdEpaper");
+        DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
     }
 
     size_t len = strlen(str);
     if (len > 384) {
+        DBG_PRINTLN("cmdEpaper");
+        DBG_PRINTLN("\tEINVALID_PARAM");
         return EINVALID_PARAM;
     }
 
@@ -312,6 +346,10 @@ void LnShield::easyEventPoll()
 {
     Err_t ret = cmdPolling();
     if (ret != ENONE) {
+        DBG_PRINTLN("error");
+        DBG_PRINTLN("\tSTATUS");
+        DBG_PRINT("\t");
+        DBG_PRINTLN(mStatus);
         while (true) {
             Serial.write(ret);
             if (mEvtCbError != 0) {
@@ -420,7 +458,10 @@ LnShield::Err_t LnShield::handshake()
         }
         if (lp == sizeof(INITRD)) {
             Serial.write(INITWT, sizeof(INITWT));
+            DBG_PRINTLN("STAT_NORMAL");
             mStatus = STAT_NORMAL;
+            delay(100);
+            
             // local_msatの更新
             err = cmdPolling();
         } else {
@@ -476,13 +517,30 @@ LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint16_t *pRecvLen)
 
     rd = Serial.readBytes(mWorkBuf, 6);
     if (rd != 6) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_HEAD_LEN");
+        DBG_PRINT("\t");
+        DBG_PRINTLN(rd);
         return EUART_RD_HEAD_LEN;
     }
 
-    if ((mWorkBuf[0] != 0x00) || (mWorkBuf[1] != 0xff)) {
+    if (mWorkBuf[0] != 0x00) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_HEAD_PREAMBLE 0");
+        DBG_PRINT("\t");
+        DBG_PRINTLN(mWorkBuf[0]);
+        return EUART_RD_HEAD_PREAMBLE;
+    }
+    if (mWorkBuf[1] != 0xff) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_HEAD_PREAMBLE 1");
+        DBG_PRINT("\t");
+        DBG_PRINTLN(mWorkBuf[1]);
         return EUART_RD_HEAD_PREAMBLE;
     }
     if (((mWorkBuf[2] + mWorkBuf[3] + mWorkBuf[4]) & 0xff) != 0x00) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_HEAD_LCS");
         return EUART_RD_HEAD_LCS;
     }
 
@@ -491,6 +549,8 @@ LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint16_t *pRecvLen)
 
     rd = Serial.readBytes(mWorkBuf, len + 2);
     if (rd != len + 2) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_LEN");
         return EUART_RD_TAIL_LEN;
     }
 
@@ -499,12 +559,18 @@ LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint16_t *pRecvLen)
         dcs += mWorkBuf[lp];
     }
     if (dcs != 0) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_DCS");
         return EUART_RD_TAIL_DCS;
     }
     if (mWorkBuf[len + 1] != 0xef) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_POSTAMBLE");
         return EUART_RD_TAIL_POSTAMBLE;
     }
     if ((Cmd | RES_FLAG) != reply) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_REPLY");
         return EUART_RD_REPLY;
     }
 

@@ -84,8 +84,12 @@ void setup() {
 
 void loop() {
   if (dbgboard_button()) {
-    sLn.easyEventRequestInvoice(1000);
-    max7219_scroll_string("INVOICE 1000");
+    int ret = sLn.cmdInvoice(1000);
+    if (ret == LnShield::ENONE) {
+      max7219_scroll_string("INVOICE 1000");
+    } else {
+      max7219_scroll_string("FAIL INVOICE");
+    }
   }
   sLn.easyEventPoll();
 
