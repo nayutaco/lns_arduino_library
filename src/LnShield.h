@@ -11,12 +11,12 @@ public:
     static const uint64_t       AMOUNT_INIT = UINT64_MAX;
 
 public:
-    enum UserStatus_t {
-        USERSTATUS_INIT,
-        USERSTATUS_STARTING,
-        USERSTATUS_NORMAL,
+    enum Status_t {
+        STATUS_INIT,
+        STATUS_STARTING,
+        STATUS_NORMAL,
         //
-        USERSTATUS_UNKNOWN,
+        STATUS_UNKNOWN,
     };
 
     enum Err_t {
@@ -37,9 +37,9 @@ public:
         EINVALID_RES,           ///< シールドからの応答が不正
         EPROCESSING,            ///< 処理中
     };
-    typedef void (*LnShieldFuncChangeStatus_t)(UserStatus_t);
+    typedef void (*LnShieldFuncChangeStatus_t)(Status_t);
     typedef void (*LnShieldFuncChangeMsat_t)(uint64_t);
-    typedef void (*LnShieldFuncError_t)(void);
+    typedef void (*LnShieldFuncError_t)(Err_t);
 
 
 public:
@@ -90,10 +90,9 @@ public:
     /** request display invoice
      *
      * @param[in]   amountMsat      request msat
-     * @note
-     *  - UART command send in easyEventPoll()
+     * @retval  true    
      */
-    void easyEventRequestInvoice(uint64_t amountMsat);
+    bool easyEventRequestInvoice(uint64_t amountMsat);
 
 
     /********************************************************************
@@ -176,13 +175,13 @@ public:
 
 
 private:
-    enum Status_t {
-        STAT_STARTUP,           //起動直後
-        STAT_STARTING,          //init()呼び出し後
-        STAT_HANDSHAKE1,
-        STAT_HANDSHAKE2,
-        STAT_HANDSHAKE3,
-        STAT_NORMAL,            //定常状態
+    enum InStatus_t {
+        INSTAT_STARTUP,         //起動直後
+        INSTAT_STARTING,        //init()呼び出し後
+        INSTAT_HANDSHAKE1,
+        INSTAT_HANDSHAKE2,
+        INSTAT_HANDSHAKE3,
+        INSTAT_NORMAL,          //定常状態
     };
 
 
@@ -194,15 +193,14 @@ private:
 
 
 private:
-    Status_t            mStatus;
+    InStatus_t          mStatus;
     int                 mPinOE;             ///< OutputEnable
     uint8_t             mWorkBuf[64];       ///< 作業バッファ
     uint64_t            mLocalMsat;         ///< pollingで取得したmsat
 
 
-    Status_t            mEvtPrevStat;
+    InStatus_t          mEvtPrevStat;
     uint64_t            mEvtLocalMsat;
-    uint64_t            mEvtInvoice;
     LnShieldFuncChangeStatus_t  mEvtCbChangeStatus;
     LnShieldFuncChangeMsat_t    mEvtCbChangeMsat;
     LnShieldFuncError_t         mEvtCbError;

@@ -17,16 +17,16 @@ namespace {
 
 //////////////////////////////////////////////////////////////
 
-static void callbackChangeStatus(LnShield::UserStatus_t Status)
+static void callbackChangeStatus(LnShield::Status_t Status)
 {
   switch (Status) {
-  case LnShield::USERSTATUS_INIT:
+  case LnShield::STATUS_INIT:
     max7219_scroll_string("INIT");
     break;
-  case LnShield::USERSTATUS_STARTING:
+  case LnShield::STATUS_STARTING:
     max7219_scroll_string("STARTING");
     break;
-  case LnShield::USERSTATUS_NORMAL:
+  case LnShield::STATUS_NORMAL:
     sAmount = sLn.getLastMsat();
     char str[30];
     sprintf(str, "NORMAL %ld", (unsigned long)sAmount);
@@ -60,10 +60,15 @@ static void callbackChangeMsat(uint64_t amountMsat)
 }
 
 
-static void callbackError()
+static void callbackError(LnShield::Err_t Err)
 {
-  max7219_scroll_string("ERROR");
+  (void)Err;
+
   dbgboard_led(DBGBOARD_LED_ERROR);
+  while (true) {
+    max7219_scroll_string("ERROR");
+    delay(10000);
+  }
 }
 
 //////////////////////////////////////////////////////////////

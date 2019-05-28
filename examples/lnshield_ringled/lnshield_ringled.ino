@@ -2,7 +2,6 @@
 #include <LnShield.h>
 
 #include "board.h"
-#include "dbgboard.h"
 
 #include <Adafruit_NeoPixel.h>
 #ifdef __AVR__
@@ -11,11 +10,12 @@
 
 namespace {
   LnShield sLn(PIN_OE);   //LightningNetwork Shield
+  uint64_t mAmount = LnShield::AMOUNT_INIT;
 }
 
 
 //////////////////////////////////////////////////////////////
-static Adafruit_NeoPixel strip = Adafruit_NeoPixel(144, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
+static Adafruit_NeoPixel strip = Adafruit_NeoPixel(16, PIN_NEOPIXEL, NEO_GRB + NEO_KHZ800);
 static int ledCount;
 
 static void colorWipe(uint32_t c, uint8_t wait);
@@ -25,17 +25,22 @@ static void colorWipe(uint32_t c, uint8_t wait);
 
 static void callbackChangeStatus(LnShield::Status_t Status)
 {
-  dbgboard_buzzer(DBGBOARD_BUZZER_CHGSTAT);
+  for (int i=0; i<3; i++) {
+    neopixelBlink(strip.Color(63, 0, 0), 50);
+    neopixelBlink(strip.Color(0, 63, 0), 50);
+  }
 }
 
 
 static void callbackChangeMsat(uint64_t amountMsat)
 {
-  dbgboard_buzzer(DBGBOARD_BUZZER_GET);
-  for (int i=0; i<5; i++) {
-    neopixelBlink(strip.Color(191, 191, 0), 50); // Yellow
-    neopixelBlink(strip.Color(0, 0, 63), 50); // Blue
+  if (mAmount != LnShield::AMOUNT_INIT) {
+    for (int i=0; i<5; i++) {
+      neopixelBlink(strip.Color(191, 191, 0), 50); // Yellow
+      neopixelBlink(strip.Color(0, 0, 63), 50); // Blue
+    }
   }
+  mAmount = amountMsat;
 }
 
 
@@ -43,10 +48,9 @@ static void callbackError(LnShield::Err_t Err)
 {
   (void)Err;
 
-  dbgboard_led(DBGBOARD_LED_ERROR);
   while (true) {
-    colorWipe(strip.Color(64, 0, 0), 0);
-    colorWipe(strip.Color(0, 0, 0), 0);
+    colorWipe(strip.Color(64, 0, 0), 50);
+    colorWipe(strip.Color(0, 0, 0), 50);
     delay(100);
   }
 }
@@ -54,16 +58,13 @@ static void callbackError(LnShield::Err_t Err)
 //////////////////////////////////////////////////////////////
 
 void setup() {
-  dbgboard_setup();
-
-  dbgboard_led(DBGBOARD_LED_INIT);
-  dbgboard_buzzer(DBGBOARD_BUZZER_INIT);
   sLn.init();
-  dbgboard_led(DBGBOARD_LED_WAIT);
 
-    //neopixel
+  pinMode(PIN_BTN, INPUT_PULLUP);
+
+  //neopixel
   strip.begin();
-  strip.setBrightness(50);
+  strip.setBrightness(30);
   strip.show(); 
 
   sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
@@ -71,24 +72,26 @@ void setup() {
 
 
 void loop() {
-  //button
-  bool on = dbgboard_button();
-  if (on) {
-    bool ret = sLn.easyEventRequestInvoice(2000);
-    if (ret) {
-      dbgboard_buzzer(DBGBOARD_BUZZER_INVOICE);
-      colorWipe(strip.Color(0, 0, 192), 0);
-      colorWipe(strip.Color(0, 0, 0), 0);
+  bool ledEvent = false;
+
+  if (digitalRead(PIN_BTN) == 0) {
+    LnShield::Err_t ret = sLn.cmdInvoice(2000);
+    if (ret == LnShield::ENONE) {
+      colorWipe(strip.Color(0, 0, 192), 50);
+      colorWipe(strip.Color(0, 0, 0), 50);
     } else {
-      dbgboard_buzzer(DBGBOARD_BUZZER_ERROR);
+      colorWipe(strip.Color(128, 0, 192), 10);
     }
+    ledEvent = true;
   }
-  dbgboard_led(DBGBOARD_LED_NORMAL);
+
   
-  ledCount++;
-  if ((ledCount % 20) == 0) {
-    colorWipe(strip.Color(0, 10, 0), 0);
-    colorWipe(strip.Color(0, 0, 0), 0);
+  if (!ledEvent) {
+    ledCount++;
+    if ((ledCount % 20) == 0) {
+      colorWipe(strip.Color(0, 10, 0), 50);
+      colorWipe(strip.Color(0, 0, 0), 50);
+    }
   }
   sLn.easyEventPoll();
 

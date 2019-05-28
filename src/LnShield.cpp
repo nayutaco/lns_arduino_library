@@ -110,7 +110,7 @@ namespace
  ********************************************************************/
 
 LnShield::LnShield(int pinOutputEnable)
-    : mPinOE(pinOutputEnable), mStatus(STAT_STARTUP), mLocalMsat(AMOUNT_INIT)
+    : mPinOE(pinOutputEnable), mStatus(INSTAT_STARTUP), mLocalMsat(AMOUNT_INIT)
 {
 }
 
@@ -129,7 +129,7 @@ LnShield::Err_t LnShield::init()
     DBG_INIT();
     DBG_PRINTLN("begin");
 
-    if (mStatus != STAT_STARTUP) {
+    if (mStatus != INSTAT_STARTUP) {
         DBG_PRINTLN("EALREADY_INIT");
         return EALREADY_INIT;
     }
@@ -144,7 +144,7 @@ LnShield::Err_t LnShield::init()
     Serial.begin(UART_SPEED);
 
     //初期化開始
-    mStatus = STAT_STARTING;
+    mStatus = INSTAT_STARTING;
 
     return ENONE;
 }
@@ -156,7 +156,7 @@ LnShield::Err_t LnShield::init()
 
 LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 {
-    if (mStatus != STAT_NORMAL) {
+    if (mStatus != INSTAT_NORMAL) {
         DBG_PRINTLN("cmdGetBalance");
         DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
@@ -179,7 +179,7 @@ LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 
 LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 {
-    if (mStatus != STAT_NORMAL) {
+    if (mStatus != INSTAT_NORMAL) {
         DBG_PRINTLN("cmdGetNewAddress");
         DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
@@ -198,7 +198,7 @@ LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 
 LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 {
-    if (mStatus != STAT_NORMAL) {
+    if (mStatus != INSTAT_NORMAL) {
         DBG_PRINTLN("cmdSetFeeRate");
         DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
@@ -217,7 +217,7 @@ LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 {
     return EDISABLED;
-    // if (mStatus != STAT_NORMAL) {
+    // if (mStatus != INSTAT_NORMAL) {
     //     return EDISABLED;
     // }
 
@@ -242,7 +242,7 @@ LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 
 LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat)
 {
-    if (mStatus != STAT_NORMAL) {
+    if (mStatus != INSTAT_NORMAL) {
         DBG_PRINTLN("cmdInvoice");
         DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
@@ -279,14 +279,14 @@ LnShield::Err_t LnShield::cmdPolling()
     uint16_t recv_len;
 
     switch (mStatus) {
-    case STAT_STARTING:
-    case STAT_HANDSHAKE1:
-    case STAT_HANDSHAKE2:
-    case STAT_HANDSHAKE3:
+    case INSTAT_STARTING:
+    case INSTAT_HANDSHAKE1:
+    case INSTAT_HANDSHAKE2:
+    case INSTAT_HANDSHAKE3:
         err = handshake();
         break;
 
-    case STAT_NORMAL:
+    case INSTAT_NORMAL:
         //定常状態
         err = uartSendCmd(CMD_POLL, 0, 0, &recv_len);
         if (err == ENONE) {
@@ -303,7 +303,7 @@ LnShield::Err_t LnShield::cmdPolling()
 
 LnShield::Err_t LnShield::cmdEpaper(const char str[])
 {
-    if (mStatus != STAT_NORMAL) {
+    if (mStatus != INSTAT_NORMAL) {
         DBG_PRINTLN("cmdEpaper");
         DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
@@ -330,9 +330,8 @@ void LnShield::easyEventInit(
     LnShieldFuncChangeMsat_t cbChangeMsat,
     LnShieldFuncError_t cbError)
 {
-    mEvtPrevStat = (Status_t)-1;
+    mEvtPrevStat = (InStatus_t)-1;
     mEvtLocalMsat = AMOUNT_INIT;
-    mEvtInvoice = 0;
 
     mEvtCbChangeStatus = cbChangeStatus;
     mEvtCbChangeMsat = cbChangeMsat;
@@ -350,48 +349,39 @@ void LnShield::easyEventPoll()
         DBG_PRINTLN("\tSTATUS");
         DBG_PRINT("\t");
         DBG_PRINTLN(mStatus);
-        while (true) {
-            Serial.write(ret);
-            if (mEvtCbError != 0) {
-                (*mEvtCbError)();
-            }
-            delay(50);
+        Serial.write(ret);
+        if (mEvtCbError != 0) {
+            (*mEvtCbError)(ret);
         }
-        //no return
     }
 
     if (mStatus != mEvtPrevStat) {
         if (mEvtCbChangeStatus != 0) {
-            UserStatus_t user_stat;
+            Status_t user_stat;
             switch (mStatus) {
-            case STAT_STARTUP:
-                user_stat = USERSTATUS_INIT;
+            case INSTAT_STARTUP:
+                user_stat = STATUS_INIT;
                 break;
-            case STAT_STARTING:
-                user_stat = USERSTATUS_STARTING;
+            case INSTAT_STARTING:
+                user_stat = STATUS_STARTING;
                 break;
-            case STAT_NORMAL:
-                user_stat = USERSTATUS_NORMAL;
+            case INSTAT_NORMAL:
+                user_stat = STATUS_NORMAL;
                 break;
-            case STAT_HANDSHAKE1:
-            case STAT_HANDSHAKE2:
-            case STAT_HANDSHAKE3:
+            case INSTAT_HANDSHAKE1:
+            case INSTAT_HANDSHAKE2:
+            case INSTAT_HANDSHAKE3:
             default:
-                user_stat = USERSTATUS_UNKNOWN;
+                user_stat = STATUS_UNKNOWN;
             }
-            if (user_stat != USERSTATUS_UNKNOWN) {
+            if (user_stat != STATUS_UNKNOWN) {
                 (*mEvtCbChangeStatus)(user_stat);
             }
         }
         mEvtPrevStat = mStatus;
     }
 
-    if (mEvtInvoice != 0) {
-        cmdInvoice(mEvtInvoice);
-        mEvtInvoice = 0;
-    }
-
-    if (mStatus == STAT_NORMAL) {
+    if (mStatus == INSTAT_NORMAL) {
         //amount_msat
         uint64_t msat = getLastMsat();
         if ((msat != AMOUNT_INIT) && (mEvtLocalMsat != msat)) {
@@ -404,9 +394,10 @@ void LnShield::easyEventPoll()
 }
 
 
-void LnShield::easyEventRequestInvoice(uint64_t amountMsat)
+bool LnShield::easyEventRequestInvoice(uint64_t amountMsat)
 {
-    mEvtInvoice = amountMsat;
+    Err_t err = cmdInvoice(amountMsat);
+    return err == ENONE;
 }
 
 
@@ -422,32 +413,32 @@ LnShield::Err_t LnShield::handshake()
     Err_t err = ENONE;
 
     //0x55が現れるまで読み捨て
-    if (mStatus == STAT_STARTING) {
+    if (mStatus == INSTAT_STARTING) {
         if (Serial.available() > 0) {
             uint8_t rd = Serial.read();
             if (rd == 0x55) {
-                mStatus = STAT_HANDSHAKE1;
+                mStatus = INSTAT_HANDSHAKE1;
                 //delay(100);
             }
         }
     }
     //0x55以外が現れるまで読み捨て
-    if (mStatus == STAT_HANDSHAKE1) {
+    if (mStatus == INSTAT_HANDSHAKE1) {
         if (Serial.available() > 0) {
             uint8_t rd = Serial.read();
             if (rd != 0x55) {
-                mStatus = STAT_HANDSHAKE2;
+                mStatus = INSTAT_HANDSHAKE2;
                 //delay(100);
             }
         }
     }
-    if (mStatus == STAT_HANDSHAKE2) {
+    if (mStatus == INSTAT_HANDSHAKE2) {
         if (Serial.available() >= sizeof(INITRD)) {
-            mStatus = STAT_HANDSHAKE3;
+            mStatus = INSTAT_HANDSHAKE3;
             //delay(100);
         }
     }
-    if (mStatus == STAT_HANDSHAKE3) {
+    if (mStatus == INSTAT_HANDSHAKE3) {
         int lp = 0;
         uint8_t rd;
         for (lp = 0; lp < sizeof(INITRD); lp++) {
@@ -458,8 +449,8 @@ LnShield::Err_t LnShield::handshake()
         }
         if (lp == sizeof(INITRD)) {
             Serial.write(INITWT, sizeof(INITWT));
-            DBG_PRINTLN("STAT_NORMAL");
-            mStatus = STAT_NORMAL;
+            DBG_PRINTLN("INSTAT_NORMAL");
+            mStatus = INSTAT_NORMAL;
             delay(100);
             
             // local_msatの更新
@@ -467,7 +458,7 @@ LnShield::Err_t LnShield::handshake()
         } else {
             Serial.write(lp);
             Serial.write(rd);
-            mStatus = STAT_STARTING;
+            mStatus = INSTAT_STARTING;
             err = EINVALID_RES;
         }
     }

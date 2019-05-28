@@ -13,7 +13,7 @@ namespace {
 
 //////////////////////////////////////////////////////////////
 
-static void callbackChangeStatus(LnShield::UserStatus_t Status)
+static void callbackChangeStatus(LnShield::Status_t Status)
 {
   digitalWrite(PIN_LED_RED, LOW);
 }
@@ -29,9 +29,13 @@ static void callbackChangeMsat(uint64_t amountMsat)
 }
 
 
-static void callbackError()
+static void callbackError(LnShield::Err_t Err)
 {
-    dbgboard_led(DBGBOARD_LED_ERROR);
+  (void)Err;
+  dbgboard_led(DBGBOARD_LED_ERROR);
+  while (true) {
+    delay(10000);
+  }
 }
 
 //////////////////////////////////////////////////////////////
