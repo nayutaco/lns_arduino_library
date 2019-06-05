@@ -9,6 +9,7 @@
 class LnShield {
 public:
     static const uint64_t       AMOUNT_INIT = UINT64_MAX;
+    static const int            INVOICE_DESC_MAX = 20;
 
 public:
     enum Status_t {
@@ -90,9 +91,10 @@ public:
     /** request display invoice
      *
      * @param[in]   amountMsat      request msat
+     * @param[in]   description     (optional)description
      * @retval  true    
      */
-    bool easyEventRequestInvoice(uint64_t amountMsat);
+    bool easyEventRequestInvoice(uint64_t amountMsat, const char *description = NULL);
 
 
     /********************************************************************
@@ -144,7 +146,13 @@ public:
      * command: Lightning Network
      ********************************************************************/
 
-    Err_t cmdInvoice(uint64_t amountMsat);
+    /** request create invoice
+     *
+     * @param[in]   amountMsat      request msat
+     * @param[in]   description     (optional)description
+     * @return  error
+     */
+    Err_t cmdInvoice(uint64_t amountMsat, const char *description = NULL);
 
 
     /********************************************************************

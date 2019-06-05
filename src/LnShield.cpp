@@ -2,7 +2,7 @@
 #include <string.h>
 #include "LnShield.h"
 
-//#define M_USE_SERIALDBG
+#define M_USE_SERIALDBG
 #ifdef M_USE_SERIALDBG
 #include <SoftwareSerial.h>
 
@@ -240,20 +240,30 @@ LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
  * command: Lightning Network
  ********************************************************************/
 
-LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat)
+LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat, const char *description/*=NULL*/)
 {
     if (mStatus != INSTAT_NORMAL) {
         DBG_PRINTLN("cmdInvoice");
         DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
     }
+    size_t len = 0;
+    if (description) {
+        len = strlen(description);
+        if (len > INVOICE_DESC_MAX) {
+            return EINVALID_PARAM;
+        }
+    }
 
-    uint8_t send_buf[8];
+    uint8_t send_buf[sizeof(uint64_t) + INVOICE_DESC_MAX];
     Err_t err = ENONE;
     uint16_t recv_len;
 
     setBe64_(send_buf, amountMsat);
-    err = uartSendCmd(CMD_INVOICE, send_buf, sizeof(send_buf), &recv_len);
+    if (len > 0) {
+        memcpy(send_buf + sizeof(uint64_t), description, len);
+    }
+    err = uartSendCmd(CMD_INVOICE, send_buf, sizeof(uint64_t) + len, &recv_len);
     return err;
 }
 
@@ -394,9 +404,9 @@ void LnShield::easyEventPoll()
 }
 
 
-bool LnShield::easyEventRequestInvoice(uint64_t amountMsat)
+bool LnShield::easyEventRequestInvoice(uint64_t amountMsat, const char *description/*=NULL*/)
 {
-    Err_t err = cmdInvoice(amountMsat);
+    Err_t err = cmdInvoice(amountMsat, description);
     return err == ENONE;
 }
 

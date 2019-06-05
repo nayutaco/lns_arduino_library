@@ -89,8 +89,8 @@ void setup() {
 
 void loop() {
   if (dbgboard_button()) {
-    int ret = sLn.cmdInvoice(1000);
-    if (ret == LnShield::ENONE) {
+    bool ret = sLn.easyEventRequestInvoice(1000, "sln test");
+    if (ret) {
       max7219_scroll_string("INVOICE 1000");
     } else {
       max7219_scroll_string("FAIL INVOICE");
