@@ -25,7 +25,9 @@ static void colorWipe(uint32_t c, uint8_t wait);
 
 static void callbackChangeStatus(LnShield::Status_t Status)
 {
-  dbgboard_buzzer(DBGBOARD_BUZZER_CHGSTAT);
+  if (Status == LnShield::STATUS_NORMAL) {
+    dbgboard_buzzer(DBGBOARD_BUZZER_CHGSTAT);
+  }
 }
 
 

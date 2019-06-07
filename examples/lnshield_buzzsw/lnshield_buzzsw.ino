@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <LnShield.h>
 
 //Rpi board
@@ -7,13 +9,16 @@
 
 static LnShield sLn(PIN_OE);   //LightningNetwork Shield
 static uint64_t sAmount = LnShield::AMOUNT_INIT;
+static int sInvoiceId = 0;
+static char sInvoiceDesc[LnShield::INVOICE_DESC_MAX + 1];
 
 //////////////////////////////////////////////////////////////
 
 static void callbackChangeStatus(LnShield::Status_t Status)
 {
   if (Status == LnShield::STATUS_NORMAL) {
-    digitalWrite(8, HIGH);
+    digitalWrite(6, LOW);
+    digitalWrite(8, LOW);
     tone(5, 2000, 500);
   }
 }
@@ -21,7 +26,10 @@ static void callbackChangeStatus(LnShield::Status_t Status)
 
 static void callbackChangeMsat(uint64_t amountMsat)
 {
-  tone(5, 2000, 2000);
+  for (int lp = 0; lp < 3; lp++) {
+    tone(5, 2000, 200);
+    delay(200);
+  }
 }
 
 
@@ -29,6 +37,7 @@ static void callbackError(LnShield::Err_t Err)
 {
   (void)Err;
   digitalWrite(6, HIGH);
+  while (true);
 }
 
 //////////////////////////////////////////////////////////////
@@ -39,17 +48,28 @@ void setup() {
   pinMode(6, OUTPUT);
   pinMode(8, OUTPUT);
 
+  digitalWrite(6, LOW);
+  digitalWrite(8, LOW);
+
+  for (int lp = 0; lp < 7; lp++) {
+    tone(5, 500 * lp, 300);
+    //noTone(5);
+    delay(200);
+  }
+
   sLn.init();
   sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
 
-  digitalWrite(6, LOW);
-  digitalWrite(8, LOW);
+  digitalWrite(6, HIGH);
+  digitalWrite(8, HIGH);
 }
 
 void loop() {
   if (digitalRead(2) == LOW) {
-    bool ret = sLn.easyEventRequestInvoice(2000);
+    sprintf(sInvoiceDesc, "payid#%d", sInvoiceId);
+    bool ret = sLn.easyEventRequestInvoice(1);
     if (ret) {
+      sInvoiceId++;
       for (int i=0; i<2; i++) {
         tone(5, 1000, 500);
         tone(5, 2000, 500);

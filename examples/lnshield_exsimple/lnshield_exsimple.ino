@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 
 #include <LnShield.h>
@@ -8,6 +9,9 @@
 
 namespace {
   LnShield sLn(PIN_OE);   //LightningNetwork Shield
+
+  int sInvoiceId = 0;
+  char sInvoiceDesc[LnShield::INVOICE_DESC_MAX + 1];
 }
 
 
@@ -53,7 +57,12 @@ void setup() {
 
 void loop() {
   if (dbgboard_button()) {
-    sLn.easyEventRequestInvoice(1000);
+    sprintf(sInvoiceDesc, "payid#%d", sInvoiceId);
+    if (sLn.easyEventRequestInvoice(1, sInvoiceDesc)) {
+      sInvoiceId++;
+    } else {
+      
+    }
   }
   sLn.easyEventPoll();
 
