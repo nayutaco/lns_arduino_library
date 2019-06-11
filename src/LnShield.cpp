@@ -36,6 +36,7 @@ namespace
     const uint8_t CMD_FEERATE = 0x04;           ///< set feerate
 
     const uint8_t CMD_INVOICE = 0x40;           ///< create invoice
+    const uint8_t CMD_GETLASTINVOICE = 0x41;    ///< get last invoice
 
     const uint8_t CMD_EPAPER = 0x7d;            ///< ePaper出力
     const uint8_t CMD_POLL = 0x7e;              ///< 生存確認
@@ -154,6 +155,7 @@ LnShield::Err_t LnShield::init()
  * command: Bitcoin
  ********************************************************************/
 
+#if 0
 LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 {
     if (mStatus != INSTAT_NORMAL) {
@@ -216,31 +218,31 @@ LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 
 LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 {
-    return EDISABLED;
-    // if (mStatus != INSTAT_NORMAL) {
-    //     return EDISABLED;
-    // }
+    if (mStatus != INSTAT_NORMAL) {
+        return EDISABLED;
+    }
 
-    // uint8_t send_buf[64];
-    // Err_t err = ENONE;
-    // uint16_t recv_len;
+    uint8_t send_buf[64];
+    Err_t err = ENONE;
+    uint16_t recv_len;
 
-    // size_t len = strlen(sendAddr);
-    // setBe64_(send_buf, amount);
-    // strcpy((char *)&send_buf[4], sendAddr);
+    size_t len = strlen(sendAddr);
+    setBe64_(send_buf, amount);
+    strcpy((char *)&send_buf[4], sendAddr);
 
-    // err = uartSendCmd(CMD_SEND, send_buf, 4 + len, &recv_len);
-    // if (err == ENONE) {
-    // }
-    // return err;
+    err = uartSendCmd(CMD_SEND, send_buf, 4 + len, &recv_len);
+    if (err == ENONE) {
+    }
+    return err;
 }
+#endif
 
 
 /********************************************************************
  * command: Lightning Network
  ********************************************************************/
 
-LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat, const char *description/*=NULL*/)
+LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat, const char *description)
 {
     if (mStatus != INSTAT_NORMAL) {
         DBG_PRINTLN("cmdInvoice");
@@ -259,11 +261,52 @@ LnShield::Err_t LnShield::cmdInvoice(uint64_t amountMsat, const char *descriptio
     Err_t err = ENONE;
     uint16_t recv_len;
 
+    int pos = 0;
     setBe64_(send_buf, amountMsat);
+    pos += sizeof(uint64_t);
     if (len > 0) {
-        memcpy(send_buf + sizeof(uint64_t), description, len);
+        memcpy(send_buf + pos, description, len);
+        pos += len;
     }
-    err = uartSendCmd(CMD_INVOICE, send_buf, sizeof(uint64_t) + len, &recv_len);
+    err = uartSendCmd(CMD_INVOICE, send_buf, pos, &recv_len);
+    return err;
+}
+
+
+LnShield::Err_t LnShield::cmdGetLastInvoice(char *pInvoice, size_t *pLen)
+{
+    DBG_PRINTLN("cmdGetLastInvoice");
+    if (mStatus != INSTAT_NORMAL) {
+        DBG_PRINTLN("\tEDISABLED");
+        return EDISABLED;
+    }
+    if (*pLen < (5 + 7 + 104 + 6)) {
+        // HRP: 5
+        // DP:
+        //  timestamp: 7
+        //  signature: 104
+        //  checksum : 6
+        DBG_PRINTLN("\tEINVALID_PARAM");
+        return EINVALID_PARAM;
+    }
+
+    Err_t err = ENONE;
+    uint16_t recv_len = *pLen - 1;
+
+    err = uartSendCmd(CMD_GETLASTINVOICE, 0, 0, pInvoice, &recv_len);
+    if (err == ENONE) {
+        if (recv_len < *pLen) {
+            pInvoice[recv_len] = '\0';
+            *pLen = recv_len;
+            DBG_PRINTLN(pInvoice);
+        } else {
+            DBG_PRINTLN("\tELESS_BUFFER");
+            err = ELESS_BUFFER;
+        }
+    } else {
+        DBG_PRINT("\t");
+        DBG_PRINTLN(err);
+    }
     return err;
 }
 
@@ -301,6 +344,8 @@ LnShield::Err_t LnShield::cmdPolling()
         err = uartSendCmd(CMD_POLL, 0, 0, &recv_len);
         if (err == ENONE) {
             mLocalMsat = getBe64_(mWorkBuf);
+        } else {
+            DBG_PRINTLN(err);
         }
         break;
     default:
@@ -311,6 +356,7 @@ LnShield::Err_t LnShield::cmdPolling()
 }
 
 
+#if 0
 LnShield::Err_t LnShield::cmdEpaper(const char str[])
 {
     if (mStatus != INSTAT_NORMAL) {
@@ -333,6 +379,7 @@ LnShield::Err_t LnShield::cmdEpaper(const char str[])
 
     return err;
 }
+#endif
 
 
 void LnShield::easyEventInit(
@@ -340,7 +387,7 @@ void LnShield::easyEventInit(
     LnShieldFuncChangeMsat_t cbChangeMsat,
     LnShieldFuncError_t cbError)
 {
-    mEvtPrevStat = (InStatus_t)-1;
+    mPrevStatus = (InStatus_t)-1;
     mEvtLocalMsat = AMOUNT_INIT;
 
     mEvtCbChangeStatus = cbChangeStatus;
@@ -356,8 +403,7 @@ void LnShield::easyEventPoll()
     Err_t ret = cmdPolling();
     if (ret != ENONE) {
         DBG_PRINTLN("error");
-        DBG_PRINTLN("\tSTATUS");
-        DBG_PRINT("\t");
+        DBG_PRINT("\tSTATUS ");
         DBG_PRINTLN(mStatus);
         Serial.write(ret);
         if (mEvtCbError != 0) {
@@ -365,7 +411,7 @@ void LnShield::easyEventPoll()
         }
     }
 
-    if (mStatus != mEvtPrevStat) {
+    if (mStatus != mPrevStatus) {
         if (mEvtCbChangeStatus != 0) {
             Status_t user_stat;
             switch (mStatus) {
@@ -388,7 +434,7 @@ void LnShield::easyEventPoll()
                 (*mEvtCbChangeStatus)(user_stat);
             }
         }
-        mEvtPrevStat = mStatus;
+        mPrevStatus = mStatus;
     }
 
     if (mStatus == INSTAT_NORMAL) {
@@ -470,6 +516,10 @@ LnShield::Err_t LnShield::handshake()
             Serial.write(rd);
             mStatus = INSTAT_STARTING;
             err = EINVALID_RES;
+            DBG_PRINT("lp=");
+            DBG_PRINTLN(lp);
+            DBG_PRINT("rd=");
+            DBG_PRINTLN(rd);
         }
     }
 
@@ -477,12 +527,12 @@ LnShield::Err_t LnShield::handshake()
 }
 
 
-/** BitcoinShieldへの送信
+/** send to LnShield
  *
- * @param[in]   Cmd     送信コマンド
- * @param[in]   pData   送信データ
- * @param[in]   Len     pData長
- * @return      エラー
+ * @param[in]   Cmd     command
+ * @param[in]   pData   data
+ * @param[in]   Len     pData length
+ * @return      error
  */
 void LnShield::uartSend(uint8_t Cmd, const uint8_t *pData, uint16_t Len)
 {
@@ -504,15 +554,15 @@ void LnShield::uartSend(uint8_t Cmd, const uint8_t *pData, uint16_t Len)
 }
 
 
-/** BitcoinShieldからの受信
+/** receive from LnShield
  *
- * @param[in]   Cmd         受信待ちコマンド
- * @param[out]  pRecvLen    受信データサイズ
+ * @param[in]       Cmd         受信待ちコマンド
+ * @param[in,out]   pRecvLen    [in]pResult length, [out]received length
  * @return      エラー
  * @note
  *          - 受信データはmWorkBuf[]に入っている.
  */
-LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint16_t *pRecvLen)
+LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint8_t *pResult, uint16_t *pRecvLen)
 {
     int rd;
 
@@ -546,33 +596,55 @@ LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint16_t *pRecvLen)
     }
 
     uint16_t len = getBe16_(mWorkBuf + 2);
+    if (len > *pRecvLen) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tELESS_BUFFER");
+        return ELESS_BUFFER;
+    }
+
     uint8_t reply = mWorkBuf[5];
-
-    rd = Serial.readBytes(mWorkBuf, len + 2);
-    if (rd != len + 2) {
-        DBG_PRINTLN("uartRecv");
-        DBG_PRINTLN("\tEUART_RD_TAIL_LEN");
-        return EUART_RD_TAIL_LEN;
-    }
-
-    uint8_t dcs = 0;
-    for (size_t lp = 0; lp < len + 1; lp++) {
-        dcs += mWorkBuf[lp];
-    }
-    if (dcs != 0) {
-        DBG_PRINTLN("uartRecv");
-        DBG_PRINTLN("\tEUART_RD_TAIL_DCS");
-        return EUART_RD_TAIL_DCS;
-    }
-    if (mWorkBuf[len + 1] != 0xef) {
-        DBG_PRINTLN("uartRecv");
-        DBG_PRINTLN("\tEUART_RD_TAIL_POSTAMBLE");
-        return EUART_RD_TAIL_POSTAMBLE;
-    }
     if ((Cmd | RES_FLAG) != reply) {
         DBG_PRINTLN("uartRecv");
         DBG_PRINTLN("\tEUART_RD_REPLY");
         return EUART_RD_REPLY;
+    }
+
+    //data
+    rd = Serial.readBytes(pResult, len);
+    if (rd != len) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_LEN1");
+        return EUART_RD_TAIL_LEN;
+    }
+    uint8_t sum = 0;
+    for (size_t lp = 0; lp < len; lp++) {
+        sum += pResult[lp];
+    }
+
+    uint8_t dcs;
+    rd = Serial.readBytes(&dcs, 1);
+    if (rd != 1) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_DCS1");
+        return EUART_RD_TAIL_DCS;
+    }
+    if ((sum + dcs) & 0xff != 0) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_DCS2");
+        return EUART_RD_TAIL_DCS;
+    }
+
+    uint8_t postamble;
+    rd = Serial.readBytes(&postamble, 1);
+    if (rd != 1) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_POSTAMBLE1");
+        return EUART_RD_TAIL_POSTAMBLE;
+    }
+    if (postamble != 0xef) {
+        DBG_PRINTLN("uartRecv");
+        DBG_PRINTLN("\tEUART_RD_TAIL_POSTAMBLE2");
+        return EUART_RD_TAIL_POSTAMBLE;
     }
 
     *pRecvLen = len;
@@ -582,10 +654,18 @@ LnShield::Err_t LnShield::uartRecv(uint8_t Cmd, uint16_t *pRecvLen)
 
 LnShield::Err_t LnShield::uartSendCmd(uint8_t Cmd, const uint8_t *pData, uint16_t Len, uint16_t *pRecvLen)
 {
+    *pRecvLen = sizeof(mWorkBuf);
+    return uartSendCmd(Cmd, pData, Len, mWorkBuf, pRecvLen);
+}
+
+
+LnShield::Err_t LnShield::uartSendCmd(
+            uint8_t Cmd, const uint8_t *pData, uint16_t Len,
+            uint8_t *pResult, uint16_t *pRecvLen)
+{
     Err_t err;
 
-    *pRecvLen = 0;
     uartSend(Cmd, pData, Len);
-    err = uartRecv(Cmd, pRecvLen);
+    err = uartRecv(Cmd, pResult, pRecvLen);
     return err;
 }

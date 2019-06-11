@@ -22,21 +22,22 @@ public:
 
     enum Err_t {
         ENONE,
-        ERROR,                  ///< エラー
+        ERROR,                  ///< something error
 
-        EUART_RD_HEAD_LEN,      ///< uart packet Header不正
-        EUART_RD_HEAD_PREAMBLE, ///< uart packet Header不正
-        EUART_RD_HEAD_LCS,      ///< uart packet Header不正
-        EUART_RD_TAIL_LEN,      ///< uart packet Data不正
-        EUART_RD_TAIL_POSTAMBLE,///< uart packet Data不正
-        EUART_RD_TAIL_DCS,      ///< uart packet Data不正
-        EUART_RD_REPLY,         ///< uart packet response不正
+        EUART_RD_HEAD_LEN,      ///< invalid uart packet Header
+        EUART_RD_HEAD_PREAMBLE, ///< invalid uart packet Header
+        EUART_RD_HEAD_LCS,      ///< invalid uart packet Header
+        EUART_RD_TAIL_LEN,      ///< invalid uart packet Data
+        EUART_RD_TAIL_POSTAMBLE,///< invalid uart packet Data
+        EUART_RD_TAIL_DCS,      ///< invalid uart packet Data
+        EUART_RD_REPLY,         ///< invalid uart packet response
 
-        EALREADY_INIT,          ///< 初期化済みでinit()を呼び出した
-        EDISABLED,              ///< インスタンス使用不可
-        EINVALID_PARAM,         ///< 引数不正
-        EINVALID_RES,           ///< シールドからの応答が不正
-        EPROCESSING,            ///< 処理中
+        EALREADY_INIT,          ///< already init() called
+        EDISABLED,              ///< instance cannot use
+        EINVALID_PARAM,         ///< invalid parameter
+        EINVALID_RES,           ///< invalid response
+        ELESS_BUFFER,           ///< response too large
+        EPROCESSING,            ///< processing
     };
     typedef void (*LnShieldFuncChangeStatus_t)(Status_t);
     typedef void (*LnShieldFuncChangeMsat_t)(uint64_t);
@@ -107,7 +108,7 @@ public:
      * @param[out]      balance     Bitcoin amount
      * @return  エラー
      */
-    Err_t cmdGetBalance(uint64_t balance[]);
+    //Err_t cmdGetBalance(uint64_t balance[]);
 
 
     /** アドレス発行
@@ -116,7 +117,7 @@ public:
      * @param[out]      address     Bitcoin Address for receive
      * @return  エラー
      */
-    Err_t cmdGetNewAddress(char address[]);
+    //Err_t cmdGetNewAddress(char address[]);
 
 
     /** トランザクション手数料設定
@@ -128,7 +129,7 @@ public:
      *      - デフォルト値は、0.5 mBTC(50000 satoshi)
      *      - #sendBitcoin()後に設定した場合は、次回の #setBitcoin()で有効になる。
      */
-    Err_t cmdSetFeeRate(uint32_t feerate);
+    //Err_t cmdSetFeeRate(uint32_t feerate);
 
 
     /** Bitcoin支払い
@@ -139,7 +140,7 @@ public:
      * @param[in]       amount      送金するBitcoin
      * @return  エラー
      */
-    Err_t cmdSendBitcoin(const char sendAddr[], uint64_t amount);
+    //Err_t cmdSendBitcoin(const char sendAddr[], uint64_t amount);
 
 
     /********************************************************************
@@ -149,10 +150,19 @@ public:
     /** request create invoice
      *
      * @param[in]   amountMsat      request msat
-     * @param[in]   description     (optional)description
+     * @param[in]   description     (not NULL)description
      * @return  error
      */
-    Err_t cmdInvoice(uint64_t amountMsat, const char *description = NULL);
+    Err_t cmdInvoice(uint64_t amountMsat, const char *description);
+
+
+    /** request create invoice
+     *
+     * @param[out]      pInvoice    invoice string
+     * @param[in,out]   pLen        [in]invoice buffer length, [out]invoice result length
+     * @return  error
+     */
+    Err_t cmdGetLastInvoice(char *pInvoice, size_t *pLen);
 
 
     /********************************************************************
@@ -179,7 +189,7 @@ public:
      *
      * @return  エラー
      */
-    Err_t cmdEpaper(const char str[]);
+    //Err_t cmdEpaper(const char str[]);
 
 
 private:
@@ -196,18 +206,21 @@ private:
 private:
     Err_t handshake();
     void uartSend(uint8_t Cmd, const uint8_t *pData, uint16_t Len);
-    Err_t uartRecv(uint8_t Cmd, uint16_t *pRecvLen);
+    Err_t uartRecv(uint8_t Cmd, uint8_t *pResult, uint16_t *pRecvLen);
     Err_t uartSendCmd(uint8_t Cmd, const uint8_t *pData, uint16_t Len, uint16_t *pRecvLen);
+    Err_t uartSendCmd(
+                uint8_t Cmd, const uint8_t *pData, uint16_t Len,
+                uint8_t *pResult, uint16_t *pRecvLen);
 
 
 private:
-    InStatus_t          mStatus;
+    InStatus_t          mStatus;            ///< internal status
+    InStatus_t          mPrevStatus;        ///< internal previous status
     int                 mPinOE;             ///< OutputEnable
-    uint8_t             mWorkBuf[64];       ///< 作業バッファ
+    uint8_t             mWorkBuf[64];       ///< work buffer
     uint64_t            mLocalMsat;         ///< pollingで取得したmsat
 
 
-    InStatus_t          mEvtPrevStat;
     uint64_t            mEvtLocalMsat;
     LnShieldFuncChangeStatus_t  mEvtCbChangeStatus;
     LnShieldFuncChangeMsat_t    mEvtCbChangeMsat;

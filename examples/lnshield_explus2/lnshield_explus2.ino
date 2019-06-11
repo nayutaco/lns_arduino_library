@@ -76,11 +76,14 @@ void loop() {
   //button
   bool on = dbgboard_button();
   if (on) {
-    bool ret = sLn.easyEventRequestInvoice(2000);
+    bool ret = sLn.easyEventRequestInvoice(2000, "explus2");
     if (ret) {
       dbgboard_buzzer(DBGBOARD_BUZZER_INVOICE);
       colorWipe(strip.Color(0, 0, 192), 0);
       colorWipe(strip.Color(0, 0, 0), 0);
+      char invoice[512];
+      size_t len = sizeof(invoice);
+      sLn.cmdGetLastInvoice(invoice, &len);
     } else {
       dbgboard_buzzer(DBGBOARD_BUZZER_ERROR);
     }

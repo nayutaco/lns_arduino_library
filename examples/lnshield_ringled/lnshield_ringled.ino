@@ -75,7 +75,7 @@ void loop() {
   bool ledEvent = false;
 
   if (digitalRead(PIN_BTN) == 0) {
-    LnShield::Err_t ret = sLn.cmdInvoice(2000);
+    LnShield::Err_t ret = sLn.easyEventRequestInvoice(2000, "ringled");
     if (ret == LnShield::ENONE) {
       colorWipe(strip.Color(0, 0, 192), 50);
       colorWipe(strip.Color(0, 0, 0), 50);
