@@ -128,7 +128,7 @@ LnShield::~LnShield()
 LnShield::Err_t LnShield::init()
 {
     DBG_INIT();
-    DBG_PRINTLN("begin");
+    DBG_PRINTLN("[begin]");
 
     if (mStatus != INSTAT_STARTUP) {
         DBG_PRINTLN("EALREADY_INIT");
@@ -159,8 +159,7 @@ LnShield::Err_t LnShield::init()
 LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 {
     if (mStatus != INSTAT_NORMAL) {
-        DBG_PRINTLN("cmdGetBalance");
-        DBG_PRINTLN("\tEDISABLED");
+        DBG_PRINTLN("cmdGetBalance:EDISABLED");
         return EDISABLED;
     }
 
@@ -182,8 +181,7 @@ LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 {
     if (mStatus != INSTAT_NORMAL) {
-        DBG_PRINTLN("cmdGetNewAddress");
-        DBG_PRINTLN("\tEDISABLED");
+        DBG_PRINTLN("cmdGetNewAddress:EDISABLED");
         return EDISABLED;
     }
 
@@ -201,8 +199,7 @@ LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 {
     if (mStatus != INSTAT_NORMAL) {
-        DBG_PRINTLN("cmdSetFeeRate");
-        DBG_PRINTLN("\tEDISABLED");
+        DBG_PRINTLN("cmdSetFeeRate:EDISABLED");
         return EDISABLED;
     }
 
@@ -359,14 +356,15 @@ LnShield::Err_t LnShield::cmdPolling()
 #if 0
 LnShield::Err_t LnShield::cmdEpaper(const char str[])
 {
+    DBG_PRINTLN("cmdEpaper");
     if (mStatus != INSTAT_NORMAL) {
-        DBG_PRINTLN("cmdEpaper\tEDISABLED");
+        DBG_PRINTLN("\tEDISABLED");
         return EDISABLED;
     }
 
     size_t len = strlen(str);
     if (len > 384) {
-        DBG_PRINTLN("cmdEpaper\tEINVALID_PARAM");
+        DBG_PRINTLN("\tEINVALID_PARAM");
         return EINVALID_PARAM;
     }
 
@@ -400,7 +398,9 @@ void LnShield::easyEventPoll()
 {
     Err_t ret = cmdPolling();
     if (ret != ENONE) {
-        DBG_PRINT("error\tSTATUS ");
+        DBG_PRINT("error=");
+        DBG_PRINTLN(ret);
+        DBG_PRINT("STATUS=");
         DBG_PRINTLN(mStatus);
         Serial.write(ret);
         if (mEvtCbError != 0) {
@@ -468,6 +468,7 @@ LnShield::Err_t LnShield::handshake()
 {
     const uint8_t INITRD[] = { 0x12, 0x34, 0x56, 0x78, 0x9a };
     const uint8_t INITWT[] = { 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x00, 0x9a, 0x78, 0x56, 0x34, 0x12 };
+    const uint8_t ERR[] = { 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a, 0x5a };
 
     Err_t err = ENONE;
 
@@ -476,29 +477,40 @@ LnShield::Err_t LnShield::handshake()
         if (Serial.available() > 0) {
             uint8_t rd = Serial.read();
             if (rd == 0x55) {
+                DBG_PRINTLN("HANDSHAKE1");
                 mStatus = INSTAT_HANDSHAKE1;
                 //delay(100);
             }
         }
     }
-    //0x55以外が現れるまで読み捨て
+    //0xaaが現れるまで読み捨て
     if (mStatus == INSTAT_HANDSHAKE1) {
         if (Serial.available() > 0) {
             uint8_t rd = Serial.read();
-            if (rd != 0x55) {
+            if (rd == 0x00) {
+                DBG_PRINTLN("HANDSHAKE2");
                 mStatus = INSTAT_HANDSHAKE2;
                 //delay(100);
+            } else if (rd == 0x55) {
+                //read out
+            } else {
+                mStatus = INSTAT_STARTING;
+                err = 0;
+                DBG_PRINTLN("fail INSTAT_HANDSHAKE2");
+                Serial.write(ERR, sizeof(ERR));
+                delay(2000);
             }
         }
     }
     if (mStatus == INSTAT_HANDSHAKE2) {
         if (Serial.available() >= sizeof(INITRD)) {
+            DBG_PRINTLN("HANDSHAKE3");
             mStatus = INSTAT_HANDSHAKE3;
             //delay(100);
         }
     }
     if (mStatus == INSTAT_HANDSHAKE3) {
-        int lp = 0;
+        int lp;
         uint8_t rd;
         for (lp = 0; lp < sizeof(INITRD); lp++) {
             rd = Serial.read();
@@ -515,14 +527,16 @@ LnShield::Err_t LnShield::handshake()
             // local_msatの更新
             err = cmdPolling();
         } else {
-            Serial.write(lp);
-            Serial.write(rd);
+            //retry
             mStatus = INSTAT_STARTING;
-            err = EINVALID_RES;
+            err = 0;
+            DBG_PRINTLN("fail INSTAT_HANDSHAKE3");
             DBG_PRINT("lp=");
             DBG_PRINTLN(lp);
             DBG_PRINT("rd=");
             DBG_PRINTLN(rd);
+            Serial.write(ERR, sizeof(ERR));
+            delay(2000);
         }
     }
 

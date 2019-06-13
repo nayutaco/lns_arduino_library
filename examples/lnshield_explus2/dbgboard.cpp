@@ -57,15 +57,13 @@ void dbgboard_buzzer(DbgBoardBuzzerType_t Type)
 {
     switch (Type) {
     case DBGBOARD_BUZZER_INIT:
-        for (int i = 0; i < 2; i++) {
-            beep(4, 100);
-            beep(5, 100);
-            beep(6, 100);
-        }
+        beep(4, 50);
+        //beep(5, 500);
+        //beep(6, 500);
         break;
 
     case DBGBOARD_BUZZER_CHGSTAT:
-        beep(0);
+        beep(0, 50);
         break;
 
     case DBGBOARD_BUZZER_INVOICE:
@@ -73,8 +71,10 @@ void dbgboard_buzzer(DbgBoardBuzzerType_t Type)
         break;
 
     case DBGBOARD_BUZZER_GET:
-        beep(4, 100);
-        beep(7, 500);
+        for (int i=0; i<2; i++) {
+          beep(4, 50);
+          beep(7, 100);
+        }
         break;
 
     case DBGBOARD_BUZZER_PAY:
@@ -111,7 +111,8 @@ bool dbgboard_button()
 static void beep(int num, int beat)
 {
     const int HZ[] = {
-        262, 294, 330, 349, 392, 440, 494, 523,
+        //262, 294, 330, 349, 392, 440, 494, 523,
+        262, 294, 330, 349, 392, 440, 494, 623,
     };
     tone(PIN_BUZZ, HZ[num], beat);
     delay(beat);

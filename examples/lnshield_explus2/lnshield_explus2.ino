@@ -34,7 +34,7 @@ static void callbackChangeStatus(LnShield::Status_t Status)
 static void callbackChangeMsat(uint64_t amountMsat)
 {
   dbgboard_buzzer(DBGBOARD_BUZZER_GET);
-  for (int i=0; i<5; i++) {
+  for (int i=0; i<3; i++) {
     neopixelBlink(strip.Color(191, 191, 0), 50); // Yellow
     neopixelBlink(strip.Color(0, 0, 63), 50); // Blue
   }
@@ -81,7 +81,8 @@ void loop() {
       dbgboard_buzzer(DBGBOARD_BUZZER_INVOICE);
       colorWipe(strip.Color(0, 0, 192), 0);
       colorWipe(strip.Color(0, 0, 0), 0);
-      char invoice[512];
+
+      char invoice[336];
       size_t len = sizeof(invoice);
       sLn.cmdGetLastInvoice(invoice, &len);
     } else {
