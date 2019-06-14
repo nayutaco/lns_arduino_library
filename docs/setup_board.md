@@ -32,7 +32,7 @@ There are three way power supply to Raspberry Pi.
 
 1. USB
 2. AC adapter
-3. micro-B USB
+3. micro-B USB(show [NOTE](#note))
 
 ### NOTE
 
