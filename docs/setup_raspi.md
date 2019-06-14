@@ -57,23 +57,23 @@ http://IP_ADDRESS:7000/
 
 ## WiFi setting and reboot CLIENT mode
 
-1. start AP mode
+1. start AP mode  
    ![apstart](images/wifi_00.jpg)
 
-2. **menu: WiFi Settings > WPA_Supplicant [SSID] [PASS]**
+2. **menu: WiFi Settings > WPA_Supplicant [SSID] [PASS]**  
    ![ssid](images/wifi_01.jpg)
 
 3. set WiFi SSID/PASS you want to connect(your home, office, ...)
    * like connect your phone to WiFi
    * (it adds `/etc/wpa_supplicant/wpa_supplicant.conf`)
 
-4. **menu: WiFi Settings > Reboot with WiFi Client Mode**
+4. **menu: WiFi Settings > Reboot with WiFi Client Mode**  
    ![cli](images/wifi_02.jpg)
 
-5. Raspberry Pi reboot with CLIENT mode(browser is disconnected)
+5. Raspberry Pi reboot with CLIENT mode(browser is disconnected)  
    ![reboot](images/wifi_03.jpg)
 
-6. start CLIENT mode
+6. start CLIENT mode  
    ![cli](images/wifi_04.jpg)
 
 7. done !
@@ -82,5 +82,5 @@ http://IP_ADDRESS:7000/
 
 * `Startup...` shows block download.
   * It takes many times and sometime restart.
-* You want to change from CLIENT to AP mode, push Shield's Switch long time(above 10sec).
+* You want to change from CLIENT to AP mode, push Shield's Switch long time(above 10sec).  
    ![cli](images/emer_01.jpg)
