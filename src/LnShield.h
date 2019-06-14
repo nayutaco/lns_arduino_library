@@ -1,3 +1,7 @@
+/** @file   LnShield.h
+ *  @brief  Lightning Shield for Arduino API
+ *  @author Nayuta inc.
+ */
 #ifndef LN_SHIELD_H_
 #define LN_SHIELD_H_
 
@@ -52,7 +56,7 @@ public:
 public:
     /** 初期化
      *
-     * @return  エラー
+     * @return  error
      */
     Err_t init();
 
@@ -99,51 +103,6 @@ public:
 
 
     /********************************************************************
-     * command: Bitcoin
-     ********************************************************************/
-
-    /** 支払い可能Bitcoin値取得
-     * 現在のウォレットで支払い可能なBitcoin値を取得する。
-     *
-     * @param[out]      balance     Bitcoin amount
-     * @return  エラー
-     */
-    //Err_t cmdGetBalance(uint64_t balance[]);
-
-
-    /** アドレス発行
-     * 受信するためのBitcoinアドレスを生成する。
-     *
-     * @param[out]      address     Bitcoin Address for receive
-     * @return  エラー
-     */
-    //Err_t cmdGetNewAddress(char address[]);
-
-
-    /** トランザクション手数料設定
-     * #sendBitcoin()時に支払われるトランザクション手数料を設定する。
-     *
-     * @param[in]       feerate     feerate/1000byte
-     * @return  エラー
-     * @note
-     *      - デフォルト値は、0.5 mBTC(50000 satoshi)
-     *      - #sendBitcoin()後に設定した場合は、次回の #setBitcoin()で有効になる。
-     */
-    //Err_t cmdSetFeeRate(uint32_t feerate);
-
-
-    /** Bitcoin支払い
-     * Bitcoin送金のトランザクションを発行する。<br>
-     * amount以外にfeeも支払う。
-     *
-     * @param[in]       sendAddr    送金するBitcoinアドレス
-     * @param[in]       amount      送金するBitcoin
-     * @return  エラー
-     */
-    //Err_t cmdSendBitcoin(const char sendAddr[], uint64_t amount);
-
-
-    /********************************************************************
      * command: Lightning Network
      ********************************************************************/
 
@@ -169,7 +128,7 @@ public:
      * command: control
      ********************************************************************/
 
-    /** Raspberry Pi停止
+    /** stop Raspberry Pi
      *
      */
     Err_t cmdStop();
@@ -185,21 +144,14 @@ public:
     Err_t cmdPolling();
 
 
-    /** ePaper出力
-     *
-     * @return  エラー
-     */
-    //Err_t cmdEpaper(const char str[]);
-
-
 private:
     enum InStatus_t {
-        INSTAT_STARTUP,         //起動直後
-        INSTAT_STARTING,        //init()呼び出し後
+        INSTAT_STARTUP,
+        INSTAT_STARTING,
         INSTAT_HANDSHAKE1,
         INSTAT_HANDSHAKE2,
         INSTAT_HANDSHAKE3,
-        INSTAT_NORMAL,          //定常状態
+        INSTAT_NORMAL,
     };
 
 
@@ -218,7 +170,7 @@ private:
     InStatus_t          mPrevStatus;        ///< internal previous status
     int                 mPinOE;             ///< OutputEnable
     uint8_t             mWorkBuf[64];       ///< work buffer
-    uint64_t            mLocalMsat;         ///< pollingで取得したmsat
+    uint64_t            mLocalMsat;         ///< local msat
 
 
     uint64_t            mEvtLocalMsat;

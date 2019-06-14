@@ -1,3 +1,7 @@
+/** @file   LnShield.cpp
+ *  @brief  Lightning Shield for Arduino API
+ *  @author Nayuta inc.
+ */
 #include <Arduino.h>
 #include <string.h>
 #include "LnShield.h"
@@ -38,11 +42,11 @@ namespace
     const uint8_t CMD_INVOICE = 0x40;           ///< create invoice
     const uint8_t CMD_GETLASTINVOICE = 0x41;    ///< get last invoice
 
-    const uint8_t CMD_EPAPER = 0x7d;            ///< ePaper出力
-    const uint8_t CMD_POLL = 0x7e;              ///< 生存確認
-    const uint8_t CMD_STOP = 0x7f;              ///< Raspi停止
+    const uint8_t CMD_EPAPER = 0x7d;            ///< ePaper output
+    const uint8_t CMD_POLL = 0x7e;              ///< ping/pong poll
+    const uint8_t CMD_STOP = 0x7f;              ///< Raspi stop
 
-    const uint8_t RES_FLAG = 0x80;              ///< レスポンスフラグ
+    const uint8_t RES_FLAG = 0x80;              ///< response flag
 }
 
 
@@ -156,6 +160,12 @@ LnShield::Err_t LnShield::init()
  ********************************************************************/
 
 #if 0
+/** 支払い可能Bitcoin値取得
+ * 現在のウォレットで支払い可能なBitcoin値を取得する。
+ *
+ * @param[out]      balance     Bitcoin amount
+ * @return  エラー
+ */
 LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 {
     if (mStatus != INSTAT_NORMAL) {
@@ -178,6 +188,12 @@ LnShield::Err_t LnShield::cmdGetBalance(uint64_t balance[])
 }
 
 
+/** アドレス発行
+ * 受信するためのBitcoinアドレスを生成する。
+ *
+ * @param[out]      address     Bitcoin Address for receive
+ * @return  エラー
+ */
 LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 {
     if (mStatus != INSTAT_NORMAL) {
@@ -196,6 +212,15 @@ LnShield::Err_t LnShield::cmdGetNewAddress(char address[])
 }
 
 
+/** トランザクション手数料設定
+ * #sendBitcoin()時に支払われるトランザクション手数料を設定する。
+ *
+ * @param[in]       feerate     feerate/1000byte
+ * @return  エラー
+ * @note
+ *      - デフォルト値は、0.5 mBTC(50000 satoshi)
+ *      - #sendBitcoin()後に設定した場合は、次回の #setBitcoin()で有効になる。
+ */
 LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 {
     if (mStatus != INSTAT_NORMAL) {
@@ -213,6 +238,14 @@ LnShield::Err_t LnShield::cmdSetFeeRate(uint32_t feerate)
 }
 
 
+/** Bitcoin支払い
+ * Bitcoin送金のトランザクションを発行する。<br>
+ * amount以外にfeeも支払う。
+ *
+ * @param[in]       sendAddr    送金するBitcoinアドレス
+ * @param[in]       amount      送金するBitcoin
+ * @return  エラー
+ */
 LnShield::Err_t LnShield::cmdSendBitcoin(const char sendAddr[], uint64_t amount)
 {
     if (mStatus != INSTAT_NORMAL) {
@@ -354,6 +387,10 @@ LnShield::Err_t LnShield::cmdPolling()
 
 
 #if 0
+/** ePaper出力
+ *
+ * @return  エラー
+ */
 LnShield::Err_t LnShield::cmdEpaper(const char str[])
 {
     DBG_PRINTLN("cmdEpaper");
