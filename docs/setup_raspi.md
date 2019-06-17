@@ -26,6 +26,7 @@ There is two modes.
 
   * SSID: `PtarmServer` / PASS: `Ptarmigan`
   * IP address: `192.168.4.1`
+    * Please disconnect all network other than Wi-Fi before you browse `http://192.168.4.1:7000/`.
   * WEB setting: enable
   * Lightning Network: disable
 
