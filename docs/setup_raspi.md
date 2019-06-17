@@ -82,5 +82,8 @@ http://IP_ADDRESS:7000/
 
 * `Startup...` shows block download.
   * It takes many times and sometime restart.
+* If ePaper display "no IP addr", Raspberry Pi doesn't get IP address from DHCP server.  
+  ![noipaddr](images/noipaddr.jpg)
+  * Maybe fail Wi-Fi settings.  
 * You want to change from CLIENT to AP mode, push Shield's Switch long time(above 10sec).  
-   ![cli](images/emer_01.jpg)
+  ![cli](images/emer_01.jpg)
