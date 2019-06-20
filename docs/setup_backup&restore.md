@@ -23,11 +23,11 @@
     1. **menu: Raspberry pi Controls > Backup & Restore DB**  
        ![backup & restore](images/bs01.jpg)
     
-    2. select Restore button
+    2. select Restore button  
        ![backup](images/bs04.jpg)
 
     3. browse backup file(yyyymmdd.tar.gz)  
-       This step you have to select the backup file downloaded in step 1-3.
+       This step you have to select the backup file downloaded in step 1-iii.
        ![backup](images/bs05.jpg)
 
     4. upload the file  
