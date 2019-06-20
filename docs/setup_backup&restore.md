@@ -1,6 +1,6 @@
 # [Setup](../README.md)> Backup & Restore DB
 
-##Introduction to backup & restore DB for updating SD card.
+## Introduction to backup & restore DB for updating SD card.
 
 1. Backup DB (assume this step is in Client mode)
     1. **menu: Raspberry pi Controls > Backup & Restore DB**  
