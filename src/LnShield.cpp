@@ -6,6 +6,8 @@
 #include <string.h>
 #include "LnShield.h"
 
+#define M_PIN_OE            (4)     //output enable
+
 //#define M_USE_SERIALDBG
 #ifdef M_USE_SERIALDBG
 #include <SoftwareSerial.h>
@@ -114,8 +116,8 @@ namespace
  * ctor/dtor
  ********************************************************************/
 
-LnShield::LnShield(int pinOutputEnable)
-    : mPinOE(pinOutputEnable), mStatus(INSTAT_STARTUP), mLocalMsat(AMOUNT_INIT)
+LnShield::LnShield()
+    : mStatus(INSTAT_STARTUP), mLocalMsat(AMOUNT_INIT)
 {
 }
 
@@ -139,12 +141,12 @@ LnShield::Err_t LnShield::init()
         return EALREADY_INIT;
     }
 
-    pinMode(mPinOE, OUTPUT);
+    pinMode(M_PIN_OE, OUTPUT);
 
-    //mPinOE
-    digitalWrite(mPinOE, HIGH);
+    //output enable
+    digitalWrite(M_PIN_OE, HIGH);
     //for Arduino program write
-    digitalWrite(mPinOE, LOW);
+    digitalWrite(M_PIN_OE, LOW);
 
     Serial.begin(UART_SPEED);
 

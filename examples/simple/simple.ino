@@ -2,25 +2,35 @@
 #include <stdlib.h>
 
 #include <LnShield.h>
+#include <SoftwareSerial.h>
 
-//used by Lightning Shield
-#define PIN_RX          (0)   //UART
-#define PIN_TX          (1)   //UART
-#define PIN_OE          (4)   //UART Output Enable
-
-//debug board
 #define PIN_LED         (5)   //LED
 #define PIN_BTN         (6)   //button
 
 #define BUTTON_LIMIT    (20)
 
+#define M_DEBUG_MODE
+#ifdef M_DEBUG_MODE
+#define DBG_SERIAL_RX   (2)   //not use
+#define DBG_SERIAL_TX   (3)   //debug output
+#define DBG_BEGIN()         sDebug.begin(115200)
+#define DBG_PRINTLN(val)    sDebug.println(val)
+#else
+#define DBG_BEGIN()         //none
+#define DBG_PRINTLN(val)    //none
+#endif
+
 
 namespace {
-  LnShield sLn(PIN_OE);   //Lightning Shield instance
+  LnShield sLn;       //Lightning Shield instance
 
   int sInvoiceId = 0;
   char sInvoiceDesc[LnShield::INVOICE_DESC_MAX + 1];
   int sButtonCnt;
+
+#ifdef M_DEBUG_MODE
+  SoftwareSerial sDebug(DBG_SERIAL_RX, DBG_SERIAL_TX);
+#endif
 }
 
 
@@ -39,6 +49,7 @@ static void ledBlink(int num, int delayMs)
 static void callbackChangeStatus(LnShield::Status_t status)
 {
   if (status == LnShield::STATUS_NORMAL) {
+    DBG_PRINTLN("status: NORMAL");
     digitalWrite(PIN_LED, LOW);
   }
 }
@@ -46,6 +57,7 @@ static void callbackChangeStatus(LnShield::Status_t status)
 
 static void callbackChangeMsat(uint64_t amountMsat)
 {
+  DBG_PRINTLN("change amount");
   ledBlink(4, 500);
 }
 
@@ -53,6 +65,7 @@ static void callbackChangeMsat(uint64_t amountMsat)
 static void callbackError(LnShield::Err_t err)
 {
   (void)err;
+  DBG_PRINTLN("error");
   while (true) {
     digitalWrite(PIN_LED, HIGH);
     delay(100);
@@ -64,6 +77,9 @@ static void callbackError(LnShield::Err_t err)
 //////////////////////////////////////////////////////////////
 
 void setup() {
+  DBG_BEGIN();
+  DBG_PRINTLN("start");
+
   pinMode(PIN_BTN, INPUT_PULLUP);
   pinMode(PIN_LED, OUTPUT);
 
@@ -91,6 +107,7 @@ void loop() {
     ledBlink(2, 100);
     sprintf(sInvoiceDesc, "payid#%d", sInvoiceId);
     if (sLn.cmdInvoice(1, sInvoiceDesc) == LnShield::ENONE) {
+      DBG_PRINTLN("create invoice");
       sInvoiceId++;
     }
   }

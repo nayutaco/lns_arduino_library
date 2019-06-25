@@ -49,7 +49,7 @@ public:
 
 
 public:
-    LnShield(int pinOutputEnable);
+    LnShield();
     virtual ~LnShield();
 
 
@@ -160,7 +160,6 @@ private:
 private:
     InStatus_t          mStatus;            ///< internal status
     InStatus_t          mPrevStatus;        ///< internal previous status
-    int                 mPinOE;             ///< OutputEnable
     uint8_t             mWorkBuf[64];       ///< work buffer
     uint64_t            mLocalMsat;         ///< local msat
 
