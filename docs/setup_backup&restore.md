@@ -18,8 +18,13 @@
 
 3. Restore DB (assume this step is in AP mode as First boot)
     
-    **[ATTENTION] You must use the latest backup file!**   
-
+    **[ATTENTION] You must use the latest backup file!**  
+    
+        If you don't follow below attentions, you have a risk of taken away all of your funds.  
+        
+            1. After downloading backup, you must not reboot the device and change balance.  
+            2. After restoring DB and changing blance, you must not use same backup file to start over.  
+            
     1. **menu: Raspberry pi Controls > Backup & Restore DB**  
        ![backup & restore](images/bs01.jpg)
     
