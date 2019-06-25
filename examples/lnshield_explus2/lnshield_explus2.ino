@@ -68,7 +68,7 @@ void setup() {
   strip.setBrightness(50);
   strip.show(); 
 
-  sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
+  sLn.eventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
 }
 
 
@@ -76,8 +76,8 @@ void loop() {
   //button
   bool on = dbgboard_button();
   if (on) {
-    bool ret = sLn.easyEventRequestInvoice(2000, "explus2");
-    if (ret) {
+    LnShield::Err_t ret = sLn.cmdInvoice(2000, "explus2");
+    if (ret == LnShield::ENONE) {
       dbgboard_buzzer(DBGBOARD_BUZZER_INVOICE);
       colorWipe(strip.Color(0, 0, 192), 0);
       colorWipe(strip.Color(0, 0, 0), 0);
@@ -96,7 +96,7 @@ void loop() {
     colorWipe(strip.Color(0, 10, 0), 0);
     colorWipe(strip.Color(0, 0, 0), 0);
   }
-  sLn.easyEventPoll();
+  sLn.eventPoll();
 
   delay(100);
 }

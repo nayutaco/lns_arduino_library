@@ -65,18 +65,18 @@ void setup() {
   sServo.write(150);
 
   sLn.init();
-  sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
+  sLn.eventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
 }
 
 
 void loop() {
   if (digitalRead(PIN_BUTTON) == LOW) {
     sServo.write(155);
-    sLn.easyEventRequestInvoice(1000);
+    sLn.cmdInvoice(1000, "");
     delay(2000);
     sServo.write(150);
   }
-  sLn.easyEventPoll();
+  sLn.eventPoll();
 
   delay(100);
 }

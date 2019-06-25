@@ -61,15 +61,8 @@ public:
     Err_t init();
 
 
-    /** latest lightning amount_msat
-     *
-     * @retval  UINT64_MAX      yet updated on startup
-     */
-    uint64_t getLastMsat() const { return mLocalMsat; }
-
-
     /********************************************************************
-     * event loop for easy to use
+     * event loop
      ********************************************************************/
 
     /** initialize event loop
@@ -78,7 +71,7 @@ public:
      * @param[in]   cbChangeMsat    callback function on change local_msat
      * @param[in]   cbError         callback function on error
      */
-    void LnShield::easyEventInit(
+    void LnShield::eventInit(
             LnShieldFuncChangeStatus_t cbChangeStatus,
             LnShieldFuncChangeMsat_t cbChangeMsat,
             LnShieldFuncError_t cbError);
@@ -90,21 +83,20 @@ public:
      *  - call this function within 60sec for Raspberry Pi
      *      - Raspberry Pi check polling UART command elapse
      */
-    void easyEventPoll();
-
-
-    /** request display invoice
-     *
-     * @param[in]   amountMsat      request msat
-     * @param[in]   description     (optional)description
-     * @retval  true    
-     */
-    bool easyEventRequestInvoice(uint64_t amountMsat, const char *description = NULL);
+    void eventPoll();
 
 
     /********************************************************************
-     * command: Lightning Network
+     * request
      ********************************************************************/
+
+
+    /** latest lightning amount_msat
+     *
+     * @retval  UINT64_MAX      yet updated on startup
+     */
+    uint64_t getLastMsat() const { return mLocalMsat; }
+
 
     /** request create invoice
      *
