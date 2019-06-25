@@ -445,6 +445,9 @@ void LnShield::eventPoll()
         if (mEvtCbError != 0) {
             (*mEvtCbError)(ret);
         }
+        while (true) {
+            //not return
+        }
     }
 
     if (mStatus != mPrevStatus) {
