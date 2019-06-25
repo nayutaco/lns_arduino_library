@@ -58,7 +58,7 @@ void setup() {
   }
 
   sLn.init();
-  sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
+  sLn.eventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
 
   digitalWrite(6, HIGH);
   digitalWrite(8, HIGH);
@@ -67,8 +67,8 @@ void setup() {
 void loop() {
   if (digitalRead(2) == LOW) {
     sprintf(sInvoiceDesc, "payid#%d", sInvoiceId);
-    bool ret = sLn.easyEventRequestInvoice(1);
-    if (ret) {
+    LnShield::Err_t ret = sLn.cmdInvoice(1, sInvoiceDesc);
+    if (ret == LnShield::ENONE) {
       sInvoiceId++;
       for (int i=0; i<2; i++) {
         tone(5, 1000, 500);
@@ -80,5 +80,5 @@ void loop() {
     }
   }
 
-  sLn.easyEventPoll();
+  sLn.eventPoll();
 }

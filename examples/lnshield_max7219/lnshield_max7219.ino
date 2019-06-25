@@ -82,21 +82,21 @@ void setup() {
 
   max7219_setup();
 
-  sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
+  sLn.eventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
   max7219_scroll_string("HELLO");
 }
 
 
 void loop() {
   if (dbgboard_button()) {
-    bool ret = sLn.easyEventRequestInvoice(1000, "sln test");
-    if (ret) {
+    LnShield::Err_t ret = sLn.cmdInvoice(1000, "sln test");
+    if (ret == LnShield::ENONE) {
       max7219_scroll_string("INVOICE 1000");
     } else {
       max7219_scroll_string("FAIL INVOICE");
     }
   }
-  sLn.easyEventPoll();
+  sLn.eventPoll();
 
   delay(100);
 }

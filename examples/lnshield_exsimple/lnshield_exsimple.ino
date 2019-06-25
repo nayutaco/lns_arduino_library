@@ -69,7 +69,7 @@ void setup() {
 
   digitalWrite(PIN_LED_RED, HIGH);
   sLn.init();
-  sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
+  sLn.eventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
 }
 
 
@@ -90,11 +90,11 @@ void loop() {
   if (pushed) {
     ledBlink(2, 100);
     sprintf(sInvoiceDesc, "payid#%d", sInvoiceId);
-    if (sLn.easyEventRequestInvoice(1, sInvoiceDesc)) {
+    if (sLn.cmdInvoice(1, sInvoiceDesc) == LnShield::ENONE) {
       sInvoiceId++;
     }
   }
-  sLn.easyEventPoll();
+  sLn.eventPoll();
 
   delay(100);
 }

@@ -67,7 +67,7 @@ void setup() {
   strip.setBrightness(30);
   strip.show(); 
 
-  sLn.easyEventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
+  sLn.eventInit(callbackChangeStatus, callbackChangeMsat, callbackError);
 }
 
 
@@ -75,7 +75,7 @@ void loop() {
   bool ledEvent = false;
 
   if (digitalRead(PIN_BTN) == 0) {
-    LnShield::Err_t ret = sLn.easyEventRequestInvoice(2000, "ringled");
+    LnShield::Err_t ret = sLn.cmdInvoice(2000, "ringled");
     if (ret == LnShield::ENONE) {
       colorWipe(strip.Color(0, 0, 192), 50);
       colorWipe(strip.Color(0, 0, 0), 50);
@@ -93,7 +93,7 @@ void loop() {
       colorWipe(strip.Color(0, 0, 0), 50);
     }
   }
-  sLn.easyEventPoll();
+  sLn.eventPoll();
 
   delay(100);
 }

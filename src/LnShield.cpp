@@ -415,7 +415,7 @@ LnShield::Err_t LnShield::cmdEpaper(const char str[])
 #endif
 
 
-void LnShield::easyEventInit(
+void LnShield::eventInit(
     LnShieldFuncChangeStatus_t cbChangeStatus,
     LnShieldFuncChangeMsat_t cbChangeMsat,
     LnShieldFuncError_t cbError)
@@ -431,7 +431,7 @@ void LnShield::easyEventInit(
 }
 
 
-void LnShield::easyEventPoll()
+void LnShield::eventPoll()
 {
     Err_t ret = cmdPolling();
     if (ret != ENONE) {
@@ -487,13 +487,6 @@ void LnShield::easyEventPoll()
         }
         mEvtLocalMsat = msat;
     }
-}
-
-
-bool LnShield::easyEventRequestInvoice(uint64_t amountMsat, const char *description/*=NULL*/)
-{
-    Err_t err = cmdInvoice(amountMsat, description);
-    return err == ENONE;
 }
 
 
