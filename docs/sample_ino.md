@@ -10,7 +10,7 @@
 
 ## Arduino Sketch
 
-* [sample](https://github.com/nayutaco/lns_arduino_library/blob/master/examples/simple/simple.ino)
+* [sample.ino](https://github.com/nayutaco/lns_arduino_library/blob/master/examples/simple/simple.ino)
 
 ### `variables`
 
@@ -42,5 +42,10 @@
     * `callbackError()` is called when `ERROR` status.
 
 * `callbackChangeMsat()`
-  * local amount chnaged.
+  * local amount changed.
     * First status change to `STATUS_NORMAL`, this function will be called.
+
+* `callbackError()`
+  * Library caught error(maybe fail connect to Raspberry Pi).
+  * Never return user application.
+    * push RESET button on Arduino
