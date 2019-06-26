@@ -1,4 +1,4 @@
-# [Setup](../README.md)> Sample application
+# [Setup](../README.md)> Sample sketch
 
 ## breadboard
 
