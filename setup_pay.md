@@ -24,4 +24,4 @@ Let's making a payment using the Lightning Network!
 3. wait...
 4. ePaper displays "Received!"
 
-![received](images/invoice_received.jpg)
+![received](images/received.jpg)
