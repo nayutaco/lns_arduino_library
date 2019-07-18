@@ -12,6 +12,8 @@
 
 * [sample.ino](https://github.com/nayutaco/lns_arduino_library/blob/master/examples/simple/simple.ino)
 
+<a href="images/ardu_simple.jpg"><img src="images/ardu_simple.jpg" style="zoom:0.4;"></a>
+
 ### `variables`
 
 * `LnShield` instance
