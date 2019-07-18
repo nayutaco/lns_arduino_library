@@ -11,7 +11,7 @@
 
 #define SEND_MSAT       (10000)
 
-#define M_DEBUG_MODE
+//#define M_DEBUG_MODE
 #ifdef M_DEBUG_MODE
 #define DBG_SERIAL_RX   (2)   //not use
 #define DBG_SERIAL_TX   (3)   //debug output
