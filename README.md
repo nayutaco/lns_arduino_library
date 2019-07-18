@@ -1,4 +1,5 @@
-# Welcome to the Lightning Shield for Arduino documentation!  
+# Welcome to the Lightning Shield for Arduino documentation!
+
 You can enjoy simple electronics engineering with Lightning Network protocol.  
 
 ## Initial Setup
@@ -20,6 +21,7 @@ You can enjoy simple electronics engineering with Lightning Network protocol.
 * [Display invoice](invoice.md)
 * [Bitcoin mainnet mode](ln_mainnet.md)
 * [Backup & Restore](setup_backup_restore.md)
+* [YouTube](movies.md)
 
 ## FAQ
 
