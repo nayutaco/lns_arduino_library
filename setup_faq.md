@@ -36,7 +36,7 @@ Raspberry Pi as an WiFi access point in a standalone network. [site](https://www
 
 * SSID: `PtarmServer` / PASS: `Ptarmigan`
 * IP address: `192.168.4.1`
-  * Please disconnect all network other than Wi-Fi before you browse [http://192.168.4.1:7000/](http://192.168.4.1:7000/).
+  * Please disconnect all network other than Wi-Fi before you browse [http://192.168.4.1/](http://192.168.4.1/).
 * WEB setting: enable
 * Lightning Network: disable(Ptarmigan not start)
 
@@ -45,7 +45,7 @@ Raspberry Pi as an WiFi access point in a standalone network. [site](https://www
 Raspberry Pi connect to user's WiFi router(home, office, ...).
 
 * IP address: DHCP
-  * URL: http://IP_ADDRESS:7000/
+  * URL: http://IP_ADDRESS/
 * WEB setting: enable
 * Lightning Network: enable
 

@@ -44,7 +44,7 @@ And turn the power on!
 
 ### 3. open Browser
 
-* [http://192.168.4.1:7000/](http://192.168.4.1:7000/)
+* [http://192.168.4.1/](http://192.168.4.1/)
 * Authentication
   * User: `ptarm` / Password: `ptarm`
 
@@ -74,7 +74,7 @@ And turn the power on!
 
 You can open URL displayed IP address.
 
-* http://IP_ADDRESS:7000/
+* http://IP_ADDRESS/
 
 ![ipaddr](images/ipaddr.jpg)
 

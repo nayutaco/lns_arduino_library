@@ -26,7 +26,7 @@ Set as CLIENT mode and reboot
 
 #### `RPI_USEWEB`
 
-Start WEB server in Raspberry Pi.  port number is 7000.
+Start WEB server in Raspberry Pi.
 
 #### `RPI_MAINNET`
 
