@@ -10,3 +10,8 @@
 * [start with CLIENT mode](https://youtu.be/J_PsGJkRk5E)
 * [change mode from CLIENT to AP](https://youtu.be/2YEIvuxozdc)
 * [change mode from AP to CLIENT](https://youtu.be/dEf1TUgZkS0)
+
+
+## WEB
+
+* [WEB setting menu](https://youtu.be/VEztbIIfV-Y)
