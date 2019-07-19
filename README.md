@@ -21,6 +21,7 @@ You can enjoy simple electronics engineering with Lightning Network protocol.
 * [Display invoice](invoice.md)
 * [Bitcoin mainnet mode](ln_mainnet.md)
 * [Backup & Restore](setup_backup_restore.md)
+* [Sequence diagram](sequence.md)
 * [YouTube](movies.md)
 
 ## FAQ
