@@ -14,7 +14,7 @@ You can enjoy simple electronics engineering with Lightning Network protocol.
 ### Arduino Library
 
 * [Install library](install_lib.md)
-* [First sketch](sample_ino.md)
+* [Sample sketch](sample_ino.md)
 
 ## Guide
 
