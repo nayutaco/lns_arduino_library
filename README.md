@@ -1,7 +1,3 @@
-# Welcome to the Lightning Shield for Arduino documentation!
-
-You can enjoy simple electronics engineering with Lightning Network protocol.  
-
 ## Initial Setup
 
 ### Lightning Shield and Raspberry Pi
