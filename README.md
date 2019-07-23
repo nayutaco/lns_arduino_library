@@ -9,7 +9,7 @@
 
 ### Arduino Library
 
-* [Install library](install_lib.md)
+* [Installing Arduino library](installing_lib.md)
 * [Sample sketch](sample_ino.md)
 
 ## Guide
