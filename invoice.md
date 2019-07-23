@@ -1,9 +1,9 @@
-# [top](index.html)> display invoice
+# [top](index.html)> Displaying an invoice
 
-## invoice
+## When you create an invoice
 
 ![invoice](images/invoice.jpg)
 
-## receive on Lightning
+## When you receive Lightning payment
 
 ![received](images/received.jpg)
