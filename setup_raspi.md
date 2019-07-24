@@ -22,7 +22,10 @@ Please refere to [how to write a SD card image](https://www.raspberrypi.org/docu
 Insert the SD card into Raspberry Pi on Lightning Shield.  
 ![insert](images/insert_sd.jpg)
 
-And turn the power on!
+And turn the power on!  
+If first time booting after write SD card image, ePaper displays "First Boot".
+
+![first boot](images/firstboot.jpg)
 
 ## WiFi setting and reboot CLIENT mode
 
