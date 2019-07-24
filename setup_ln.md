@@ -8,7 +8,6 @@ Let's go to the next step - open channel.
 * [Open channel from Testnet Faucet (Lightning Shield)](#open-channel-from-testnet-faucet-lightning-shield)
 * [Open channel to Testnet Faucet (phone)](#open-channel-to-testnet-faucet-phone)
 
-
 ----
 
 ## Open channel from Testnet Faucet (Lightning Shield)

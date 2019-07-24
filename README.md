@@ -1,13 +1,13 @@
-## Initial Setup
+# Initial Setup
 
-### Lightning Shield and Raspberry Pi
+## Lightning Shield and Raspberry Pi
 
 * [Board](setup_board.md)
 * [Raspberry Pi](setup_raspi.md)
 * [Lightning Network](setup_ln.md)
 * [Payment test](setup_pay.md)
 
-### Arduino Library
+## Arduino Library
 
 * [Installing Arduino library](installing_lib.md)
 * [Sample sketch](sample_ino.md)

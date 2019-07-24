@@ -1,4 +1,4 @@
-# [top](index.html)> The mainnet of Lightning Network
+# [Index](index.html)> The mainnet of Lightning Network
 
 Lightning Shield supports both the testnet and mainnet of Bitcoin.  
 If you want to use the mainnet of Lightning Network, please change the Bitcoin network to it and restart.  

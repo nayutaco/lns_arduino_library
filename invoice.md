@@ -1,4 +1,4 @@
-# [top](index.html)> Displaying an invoice
+# [Index](index.html)> Displaying an invoice
 
 ## When you create an invoice
 

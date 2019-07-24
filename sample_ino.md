@@ -1,4 +1,4 @@
-# [top](index.html)> Sample sketch
+# [Index](index.html)> Sample sketch
 
 ## breadboard
 
@@ -10,7 +10,7 @@
 
 ## Arduino Sketch
 
-* [sample.ino](https://github.com/nayutaco/lns_arduino_library/blob/master/examples/simple/simple.ino)
+* [simple.ino](https://github.com/nayutaco/lns_arduino_library/blob/master/examples/simple/simple.ino)
 
 <a href="images/ardu_simple.jpg"><img src="images/ardu_simple.jpg" width="40%" height="40%"></a>
 
