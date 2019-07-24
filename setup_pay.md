@@ -1,4 +1,4 @@
-# [top](index.html)> Payment test
+# [Index](index.html)> Payment test
 
 Let's making a payment using the Lightning Network!
 
@@ -25,3 +25,7 @@ Let's making a payment using the Lightning Network!
 4. ePaper displays "Received!"
 
 ![received](images/received.jpg)
+
+----
+
+[Index](index.html)

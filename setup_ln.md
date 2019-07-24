@@ -1,4 +1,4 @@
-# [top](index.html)> Lightning Network
+# [Index](index.html)> Lightning Network
 
 Now all [CLIENT mode](setup_faq.md#client-mode) settings are done.  
 Let's go to the next step - open channel.
@@ -81,3 +81,9 @@ Please use [Eclair Mobile Testnet](https://play.google.com/store/apps/details?id
 ![eclair](images/eclair_testnet_open.jpg)
 
 ### 3. wait for opening channel
+
+wait above 6 confirmations
+
+----
+
+[Next> Payment test](setup_pay.md)

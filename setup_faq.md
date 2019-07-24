@@ -1,4 +1,4 @@
-# [top](index.html)> FAQ
+# [Index](index.html)> FAQ
 
 ## Lightning Shield / Raspberry Pi
 

@@ -1,4 +1,4 @@
-# [top](index.html)> Board
+# [Index](index.html)> Board
 
 * [Lightning Shield for Arduino](#lightning-shield-for-arduino)
 * [Arduino pin](#arduino-pin)
@@ -73,4 +73,7 @@ If you supply power through micro-B USB, please change a Lightning Shield's jump
 * through micro-B  
   separate the jumper from Aduino  
   ![usb](images/supply_usb.jpg)
-  
+
+----
+
+[Next> Raspberry Pi](setup_raspi.md)
