@@ -11,7 +11,7 @@
        ![backup](images/bs02.jpg)
 
     3. Download the file  
-       You can download the file wherever your local.
+       You can download the file wherever your local.   
        ![backup](images/bs03.jpg)
     
 2. Get ready for a new SD card
@@ -36,7 +36,8 @@
        ![backup](images/bs05.jpg)
 
     4. Upload the file  
-        Confirm the name you selected is correct and click 'upload' button.
+        Confirm the name you selected is correct and click 'upload' button.  
+        The file name needs not to start from 'lnshield_*', but its file extension must to be '.tar.gz'.  
        ![backup](images/bs06.jpg)
 
     5. Update DB  
@@ -44,7 +45,7 @@
        ![upload](images/bs07.jpg)
 
     6. Confirm the process complete  
-       After the update, you need to reboot this with Client mode. 
+       After the update, you need to reboot this with Client mode.  
        ![complete](images/bs08.jpg)
 
 4. Reboot with Client mode
