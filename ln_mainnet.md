@@ -18,7 +18,7 @@ NOTE: Please use something Linux console.
 
 ### 1. Change the network to the mainnet and wait for an automatic reboot
 
-**Menu: 1st Layer > Change Blockchain Network**  
+**Menu: Bitcoin > Change Blockchain Network**  
 ![change blockchain](images/ln_mainnet01.jpg)
 
 ### 2. Mainnet starts
@@ -27,7 +27,7 @@ NOTE: Please use something Linux console.
 
 ### 3. Check my node_id
 
-**Menu: Channel > Show Connect Info**
+**Menu: Lightning Network > Information**
 
 ### 4. Connect to [LNBIG](https://lnbig.com/#/) and making the API call
 
@@ -52,7 +52,7 @@ ex.
 
 ### 6. Connect LNBIG using connection string
 
-**Menu: Connect/Close > Connect [NODE_ID@IPADDR:PORT]**
+**Menu: Lightning Network > Connect Node**
 
 ### 7. If the connection is OK, execute the command below to get call the LNBIG API string.
 

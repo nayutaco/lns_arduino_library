@@ -31,11 +31,11 @@ Let's go to the next step - open channel.
 
    2. Connect to the peer node  
       Currently, Faucet node_id is `0270685ca81a8e4d4d01beec5781f4cc924684072ae52c507f8ebe9daf0caaab7b@159.203.125.125:9735` (please check the faucet site).  
-      **Menu: Connect/Close > Connect [NODE_ID@IPADDR:PORT]**  
+      **Menu: Lightning Network > Connect Node**  
       ![connect](images/ln_testnet02.jpg)
 
    3. Check the connection status: **connected**  
-      **Menu: Channel > Show Connect Info**  
+      **Menu: Lightning Network > Information**  
       ![show channel](images/ln_testnet03.jpg)
 
 ### 3. Open channel from the peer node
@@ -44,33 +44,33 @@ Let's go to the next step - open channel.
 
 ### 4. Check the connection status: **establishing**
 
-**Menu: Channel > Show Connect Info**  
+**Menu: Lightning Network > Information**  
 ![show channel](images/ln_testnet05.jpg)
 
-### 5. Wait for some confirmation
+### 5. Wait for some confirmations
 
 You can [open channel from phone](#open-channel-to-testnet-faucet-phone) while waiting.
 
 ### 6. Check the connection status: **normal operation**  
 
-**Menu: Channel > Show Connect Info**  
+**Menu: Lightning Network > Information**  
 ![show channel](images/ln_testnet06.jpg)
 
 ### 7. Channel is opened
 
 Finally, you can receive Bitcoin with Lightning Network.  
-If receiving from hopped node, you will need more confirmation.
+Receiving from hopped node, you will need more than 6 confirmations.
+
+----
 
 ## Open channel to Testnet Faucet (phone)
 
-Please use [Eclair Mobile Testnet](https://play.google.com/store/apps/details?id=fr.acinq.eclair.wallet).
-
 ![conn2](images/setup_ln_conn2.jpg)
 
-### 1. Setup Eclair Mobile Testnet
+### 1. Setup Lightning Testnet wallet
 
-1. Install Eclair Mobile Testnet to your Android.
-2. Receive Testnet amount
+1. Install Mobile Testnet wallet to your phone.
+2. Receive Testnet amount.
 
 ### 2. Open channel to the Testnet Faucet
 
@@ -81,7 +81,7 @@ Please use [Eclair Mobile Testnet](https://play.google.com/store/apps/details?id
 
 ### 3. Wait for opening channel
 
-wait above 6 confirmations
+Finally, you can send Bitcoin with Lightning Network.  
 
 ----
 

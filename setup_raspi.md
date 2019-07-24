@@ -50,7 +50,7 @@ And turn the power on!
 
 ![login](images/web_login.jpg)
 
-### 4. **Menu: WiFi Settings > WPA_Supplicant [SSID] [PASS]**  
+### 4. **Menu: Device > WiFi Settings**  
 
 ![ssid](images/wifi_01.jpg)
 
@@ -58,7 +58,7 @@ And turn the power on!
 
 * In the same way to connect your phone to WiFi
 
-### 6. **Menu: WiFi Settings > Reboot with WiFi Client Mode**  
+### 6. **Menu: Device > Reboot > Change Client Mode**  
 
 ![cli](images/wifi_02.jpg)
 
