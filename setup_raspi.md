@@ -9,15 +9,15 @@
 
 RaspbianOS + Lightning Shield for Arduino modules
 
-### 1. download a SD image file
+### 1. Download a SD image file
 
 * (download URL: under development!)
 
-### 2. write the image to the SD card
+### 2. Write the image to the SD card
 
 Please refere to [how to write a SD card image](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 
-### 3. turn the power on
+### 3. Turn the power on
 
 Insert the SD card into Raspberry Pi on Lightning Shield.  
 ![insert](images/insert_sd.jpg)
@@ -26,11 +26,11 @@ And turn the power on!
 
 ## WiFi setting and reboot CLIENT mode
 
-### 1. start [AP mode](setup_faq.md#ap-mode)
+### 1. Start [AP mode](setup_faq.md#ap-mode)
 
 ![apstart](images/wifi_00.jpg)
 
-### 2. connect your phone/PC to Raspberry Pi Wi-Fi
+### 2. Connect your phone/PC to Raspberry Pi Wi-Fi
 
 * SSID: `PtarmServer`
 * Password: `Ptarmigan`
@@ -42,7 +42,7 @@ And turn the power on!
 
 ![no Internet](images/android_nointernet.jpg)
 
-### 3. open Browser
+### 3. Open Browser
 
 * [http://192.168.4.1/](http://192.168.4.1/)
 * Authentication
@@ -50,15 +50,15 @@ And turn the power on!
 
 ![login](images/web_login.jpg)
 
-### 4. **menu: WiFi Settings > WPA_Supplicant [SSID] [PASS]**  
+### 4. **Menu: WiFi Settings > WPA_Supplicant [SSID] [PASS]**  
 
 ![ssid](images/wifi_01.jpg)
 
-### 5. set WiFi SSID/PASS that you want to connect to (your home, office, ...)
+### 5. Set WiFi SSID/PASS that you want to connect to (your home, office, ...)
 
-* in the same way to connect your phone to WiFi
+* In the same way to connect your phone to WiFi
 
-### 6. **menu: WiFi Settings > Reboot with WiFi Client Mode**  
+### 6. **Menu: WiFi Settings > Reboot with WiFi Client Mode**  
 
 ![cli](images/wifi_02.jpg)
 

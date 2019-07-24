@@ -1,7 +1,3 @@
-# Welcome to the Lightning Shield for Arduino documentation!
-
-You can enjoy simple electronics engineering with Lightning Network protocol.  
-
 ## Initial Setup
 
 ### Lightning Shield and Raspberry Pi
@@ -13,12 +9,12 @@ You can enjoy simple electronics engineering with Lightning Network protocol.
 
 ### Arduino Library
 
-* [Install library](install_lib.md)
+* [Installing Arduino library](installing_lib.md)
 * [Sample sketch](sample_ino.md)
 
 ## Guide
 
-* [Display invoice](invoice.md)
+* [Displaying an invoice](invoice.md)
 * [Bitcoin mainnet mode](ln_mainnet.md)
 * [Backup & Restore](setup_backup_restore.md)
 * [Sequence diagram](sequence.md)

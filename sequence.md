@@ -1,9 +1,9 @@
 # Sequence diagram
 
-## Request create invoice
+## Requesting to create an invoice
 
 ![Request create invoice](images/seq_request_create_invoice.png)
 
-## Receive payment
+## Receiving the payment
 
 ![Receive payment](images/seq_receive_payment.png)
