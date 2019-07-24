@@ -1,4 +1,4 @@
-# Initial Setup
+# Lightning Shield for Arduino
 
 ## Lightning Shield and Raspberry Pi
 
