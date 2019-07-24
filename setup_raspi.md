@@ -1,4 +1,4 @@
-# [top](index.html)> Raspberry Pi
+# [Index](index.html)> Raspberry Pi
 
 * [SD card](#sd-card)
 * [WiFi setting and reboot CLIENT mode](#wifi-setting-and-reboot-client-mode)
@@ -87,3 +87,7 @@ You can open URL displayed IP address.
   * It might be caused by the fail Wi-Fi setting.  
 * If you want to change the mode from CLIENT to AP, press Shield's switch for more than 5 sec..  
   ![cli](images/emer_01.jpg)
+
+----
+
+[Next> Lightning Network](setup_ln.md)
