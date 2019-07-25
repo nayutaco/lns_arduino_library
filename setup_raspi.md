@@ -11,9 +11,13 @@ RaspbianOS + Lightning Shield for Arduino modules
 
 ### 1. Download a SD image file
 
-* (download URL: under development!)
+* [v0.0.1](https://github.com/nayutaco/lns_arduino_library/releases/tag/v0.0.1)
 
-### 2. Write the image to the SD card
+### 2. unzip
+
+unzip downloaded file.
+
+### 3. Write the image to the SD card
 
 Please refere to [how to write a SD card image](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 
