@@ -1,10 +1,10 @@
 # [top](index.html)> Sample sketch
 
-## breadboard
+## Breadboard
 
 * LED x1: notification
-* Button x1: create invoice request
-* [download fritzing file](images/lnshield_sample.fzz)
+* Button x1: create an invoice request
+* [Download fritzing file](images/lnshield_sample.fzz)
 
 ![board](images/breadboard.png)
 
@@ -27,15 +27,15 @@
 ### `loop()`
 
 * get button status
-  * if pushed, call create invoice API.
+  * if pushed, call a create invoice API.
 * call `eventPoll()`
   * send and receive between Ptarmigan(ping/pong)
-    * if ping/pong fail, goto ERROR status and call error callback function.
+    * if ping/pong fails, become ERROR status and call error callback function.
   * check internal status
-    * if status change, call change status callback function.
-    * Arduino can use API on `STATUS_NORMAL` status.
+    * if the status changes, call change status callback function.
+    * Arduino is available with API on `STATUS_NORMAL` status.
   * check local amount
-    * if amount change, call change amount callback function.
+    * if amount changes, call change amount callback function.
 
 ### callback functions
 
