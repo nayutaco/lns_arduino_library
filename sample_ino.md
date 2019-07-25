@@ -1,4 +1,4 @@
-# [top](index.html)> Sample sketch
+# [Index](index.html)> Sample sketch
 
 ## Breadboard
 
