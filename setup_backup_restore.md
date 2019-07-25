@@ -1,4 +1,4 @@
-# [top](index.html)> Backup & Restore DB
+# [Index](index.html)> Backup & Restore DB
 
 Here, we would like to introduce backup & restore DB for updating a SD card.
 
