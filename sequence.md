@@ -1,4 +1,4 @@
-Sequence diagram
+# [Index](index.html)> Sequence diagram
 
 ## Requesting to create an invoice
 
