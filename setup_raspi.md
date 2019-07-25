@@ -54,6 +54,7 @@ If first time booting after write SD card image, ePaper displays "First Boot".
 * [http://192.168.4.1/](http://192.168.4.1/)
 * Authentication
   * User: `ptarm` / Password: `ptarm`
+* [movie: WiFi Setting](https://youtu.be/0fDGXs4KPa8)
 
 ![login](images/web_login.jpg)
 

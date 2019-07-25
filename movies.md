@@ -15,6 +15,7 @@
 ## WEB
 
 * [WEB setting menu](https://youtu.be/VEztbIIfV-Y)
+* [WiFi Setting](https://youtu.be/0fDGXs4KPa8)
 * [connect testnet node](https://youtu.be/Bms5hsesSYM)
 
 ## Arduino
