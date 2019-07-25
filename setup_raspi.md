@@ -48,6 +48,7 @@ The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!
 * [http://192.168.4.1/](http://192.168.4.1/)
 * Authentication
   * Username: `ptarm` / Password: `ptarm`
+* The [WiFi Setting](https://youtu.be/0fDGXs4KPa8) video can help you!
 
 ![login](images/web_login.jpg)
 
@@ -73,7 +74,7 @@ The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!
 
 ### 9. Done!
 
-You can open URL displayed IP address.
+You can open the URL displayed IP address.
 
 * http://IP_ADDRESS/
 
@@ -81,7 +82,7 @@ You can open URL displayed IP address.
 
 ## NOTE
 
-* `Syncing...` shows block downloads.
+* `Syncing...` means downloading the blocks.
   * It takes a lot of time and sometimes restarts.
 * If ePaper displays "no IP addr", Raspberry Pi does not get IP address from DHCP server.  
   ![noipaddr](images/noipaddr.jpg)
