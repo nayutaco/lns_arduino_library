@@ -3,7 +3,6 @@
 * [SD card](#sd-card)
 * [WiFi setting and reboot CLIENT mode](#wifi-setting-and-reboot-client-mode)
 
-----
 
 ## SD card
 
@@ -11,26 +10,28 @@ RaspbianOS + Lightning Shield for Arduino modules
 
 ### 1. Download a SD image file
 
-* (download URL: under development!)
+* (Download URL: under development!)
 
 ### 2. Write the image to the SD card
 
 Please refere to [how to write a SD card image](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 
-### 3. Turn the power on
+### 3. Turn on the power
 
-Insert the SD card into Raspberry Pi on Lightning Shield.  
+Before turning on the power, insert the SD card into the Raspberry Pi combined with the Lightning Shield.  
 ![insert](images/insert_sd.jpg)
 
-And turn the power on!
+After that, supply power through USB/AC adapter/micro-B USB and turn on the power! Do not worry about the first boot, it takes about a few minutes to show the first display. 
 
-## WiFi setting and reboot CLIENT mode
+Please watch [the first boot](https://youtu.be/kF_WI_qtKfI)
 
-### 1. Start [AP mode](setup_faq.md#ap-mode)
+## WiFi setting and CLIENT mode
+
+### 1. Firstly, [AP mode](setup_faq.md#ap-mode) starts
 
 ![apstart](images/wifi_00.jpg)
 
-### 2. Connect your phone/PC to Raspberry Pi Wi-Fi
+### 2. Connect your phone/PC to Raspberry Pi via Wi-Fi
 
 * SSID: `PtarmServer`
 * Password: `Ptarmigan`
@@ -46,7 +47,7 @@ And turn the power on!
 
 * [http://192.168.4.1/](http://192.168.4.1/)
 * Authentication
-  * User: `ptarm` / Password: `ptarm`
+  * Username: `ptarm` / Password: `ptarm`
 
 ![login](images/web_login.jpg)
 
