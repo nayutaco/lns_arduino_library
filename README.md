@@ -4,6 +4,9 @@
 
 * [Board](setup_board.md)
 * [Raspberry Pi](setup_raspi.md)
+
+### Tutorial
+
 * [Lightning Network](setup_ln.md)
 * [Payment test](setup_pay.md)
 
