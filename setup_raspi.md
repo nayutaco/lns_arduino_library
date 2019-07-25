@@ -23,11 +23,11 @@ Before turning on the power, insert the SD card into the Raspberry Pi combined w
 
 After that, supply power through USB/AC adapter/micro-B USB and turn on the power! Do not worry about the first boot, it takes about a few minutes to show the first display. 
 
-Please watch [the first boot](https://youtu.be/kF_WI_qtKfI)
+The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!  
 
 ## WiFi setting and CLIENT mode
 
-### 1. Firstly, [AP mode](setup_faq.md#ap-mode) starts
+### 1. First, [AP mode](setup_faq.md#ap-mode) starts
 
 ![apstart](images/wifi_00.jpg)
 
