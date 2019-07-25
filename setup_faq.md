@@ -14,7 +14,7 @@
 
 * [How to switch mainnet/testnet?](#how-to-switch-mainnettestnet)
 * [What Bitcoin feerate does Ptarmigan use?](#what-bitcoin-feerate-does-ptarmigan-use)
-* [What is "failDL"?](#what-is-faildl)
+* [What is "restart DL"?](#what-is-restartdl)
 
 ----
 
@@ -91,10 +91,10 @@ Ptarmigan SPV mode uses the following feerate service.
   * [testnet](https://api.blockcypher.com/v1/btc/test3)
   * `medium_fee_per_kb`
 
-## What is "failDL"?
+## What is "restart DL"?
 
-Sometimes, startup syncing status shows "fail DL".  
-   
+Sometimes, startup syncing status shows "restart DL", and restart syncing.  
+  
 ![fail DL](images/fail_dl.jpg)
 
 It happens that SPV(bitcoinj) fails to download for more than one minute and restart Ptarmigan.  
