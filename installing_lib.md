@@ -1,4 +1,4 @@
-# [top](index.html)> Installing Arduino library
+# [Index](index.html)> Installing Arduino library
 
 1. download the zip from our website
    * Download URL...
