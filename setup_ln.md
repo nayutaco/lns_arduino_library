@@ -1,16 +1,16 @@
 # [Index](index.html)> Lightning Network
 
-Now all [CLIENT mode](setup_faq.md#client-mode) settings are done.  
-Let's go to the next step - open channel.
+Now, all [CLIENT mode](setup_faq.md#client-mode) settings are done.  
+Let's go to the next step - open a channel.
 
 ![conn](images/setup_ln_conn.jpg)
 
-* [Open channel from Testnet Faucet (Lightning Shield)](#open-channel-from-testnet-faucet-lightning-shield)
-* [Open channel to Testnet Faucet (phone)](#open-channel-to-testnet-faucet-phone)
+* [Open a channel from Testnet Faucet (Lightning Shield)](#open-a-channel-from-testnet-faucet-lightning-shield)
+* [Open a channel to Testnet Faucet (Phone)](#open-a-channel-to-testnet-faucet-Phone)
 
 ----
 
-## Open channel from Testnet Faucet (Lightning Shield)
+## Open channel from Testnet Faucet (Lightning Shield)  
 
 ![conn1](images/setup_ln_conn1.jpg)
 
@@ -21,7 +21,7 @@ Let's go to the next step - open channel.
 
 ### 2. Connect to other node that you want to open channel with
 
-   Connect Raspberry Pi to peer node and open channel from the peer, because Raspberry Pi might not have a Global IP address.
+   Connect Raspberry Pi to peer node and open a channel from the peer, because Raspberry Pi might not have the Global IP address.
 
    1. Decide the peer node  
       You need decide the peer node. Your options are;
@@ -49,7 +49,7 @@ Let's go to the next step - open channel.
 
 ### 5. Wait for some confirmations
 
-You can [open channel from phone](#open-channel-to-testnet-faucet-phone) while waiting.
+You can [open a channel from phone](#open-a-channel-to-testnet-faucet-phone) while waiting for.
 
 ### 6. Check the connection status: **normal operation**  
 
@@ -65,12 +65,10 @@ Receiving from hopped node, you will need more than 6 confirmations.
 
 ## Open channel to Testnet Faucet (phone)
 
-![conn2](images/setup_ln_conn2.jpg)
-
 ### 1. Setup Lightning Testnet wallet
 
-1. Install Mobile Testnet wallet to your phone.
-2. Receive Testnet amount.
+1. Install a Mobile Testnet to your phone.
+2. Receive the Testnet amount.
 
 ### 2. Open channel to the Testnet Faucet
 
@@ -79,9 +77,7 @@ Receiving from hopped node, you will need more than 6 confirmations.
 
 ![eclair](images/eclair_testnet_open.jpg)
 
-### 3. Wait for opening channel
-
-Finally, you can send Bitcoin with Lightning Network.  
+Finally, you can send Bitcoin with Lightning Network!  
 
 ----
 

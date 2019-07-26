@@ -4,6 +4,6 @@
 
 ![invoice](images/invoice.jpg)
 
-## When you receive Lightning payment
+## When you receive a Lightning payment
 
 ![received](images/received.jpg)

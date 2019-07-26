@@ -1,15 +1,13 @@
 # [Index](index.html)> Payment test
 
-Let's making a Lightning payment!
+Now, let's make a Lightning payment!
 
 * [Create an invoice](#create-an-invoice)
 * [Payment](#payment)
 
-----
-
 ## Create an invoice
 
-1. Create an invoice from WEB setting.
+1. Create an invoice from the WEB setting.
 
 ![create invoice menu](images/menu_invoice_create.jpg)  
   
@@ -19,8 +17,8 @@ Let's making a Lightning payment!
 
 ## The payment
 
-1. Scan the QR code displayed the ePaper.
-2. Payment!
+1. Scan the QR code displayed on the ePaper.
+2. Make a payment.
 3. Wait...
 4. ePaper displays "Received!"
 

@@ -6,9 +6,7 @@ If you want to use the mainnet of Lightning Network, please change the Bitcoin n
 * [changing the network to the mainnet](#changing-the-network-to-the-mainnet)
 * [open channel from LNBIG (mainnet)](#open-channel-from-lnbig-mainnet)
 
-----
-
-## Changing the network to the mainnet
+## Changing Bitcoin network to the mainnet
 
 ![img](images/mainnet_testnet.jpg)
 
@@ -50,7 +48,7 @@ ex.
    028a8e53d70bc0eb7b5660943582f10b7fd6c727a78ad819ba8d45d6a638432c49@lnd-33.LNBIG.com:9735
 ```
 
-### 6. Connect LNBIG using connection string
+### 6. Connect LNBIG using the connection string
 
 **Menu: Lightning Network > Connect Node**
 

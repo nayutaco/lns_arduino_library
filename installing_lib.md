@@ -1,7 +1,7 @@
 # [Index](index.html)> Installing Arduino library
 
-1. Download the zip from our website
-   * download URL...
+1. download the zip from our website
+   * Download URL...
 
-2. Install zip file
-   * see ["Installing Additional Arduino Libraries"](https://www.arduino.cc/en/Guide/Libraries)
+2. Install the zip file
+   * Please see ["Installing Additional Arduino Libraries"](https://www.arduino.cc/en/Guide/Libraries)

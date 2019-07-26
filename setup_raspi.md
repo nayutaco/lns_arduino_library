@@ -3,7 +3,6 @@
 * [SD card](#sd-card)
 * [WiFi setting and reboot CLIENT mode](#wifi-setting-and-reboot-client-mode)
 
-----
 
 ## SD card
 
@@ -23,21 +22,22 @@ Please refere to [how to write a SD card image](https://www.raspberrypi.org/docu
 
 ### 3. Turn the power on
 
-Insert the SD card into Raspberry Pi on Lightning Shield.  
+Before turning on the power, insert the SD card into the Raspberry Pi combined with the Lightning Shield.  
 ![insert](images/insert_sd.jpg)
 
-And turn the power on!  
-If first time booting after write SD card image, ePaper displays "First Boot".
+After that, supply power through USB/AC adapter/micro-B USB and turn on the power! Do not worry about the first boot, it takes about a few minutes to show the first display. 
+
+The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!  
 
 ![first boot](images/firstboot.jpg)
 
-## WiFi setting and reboot CLIENT mode
+## WiFi setting and CLIENT mode
 
-### 1. Start [AP mode](setup_faq.md#ap-mode)
+### 1. First, [AP mode](setup_faq.md#ap-mode) starts
 
 ![apstart](images/wifi_00.jpg)
 
-### 2. Connect your phone/PC to Raspberry Pi Wi-Fi
+### 2. Connect your phone/PC to Raspberry Pi via Wi-Fi
 
 * SSID: `PtarmServer`
 * Password: `Ptarmigan`
@@ -53,12 +53,12 @@ If first time booting after write SD card image, ePaper displays "First Boot".
 
 * [http://192.168.4.1/](http://192.168.4.1/)
 * Authentication
-  * User: `ptarm` / Password: `ptarm`
-* [movie: WiFi Setting](https://youtu.be/0fDGXs4KPa8)
+  * Username: `ptarm` / Password: `ptarm`
+* The [WiFi Setting](https://youtu.be/0fDGXs4KPa8) video can help you!
 
 ![login](images/web_login.jpg)
 
-### 4. **Menu: Device > WiFi Settings**  
+### 4. **Menu: Device > WiFi Settings** 
 
 ![ssid](images/wifi_01.jpg)
 
@@ -80,7 +80,7 @@ If first time booting after write SD card image, ePaper displays "First Boot".
 
 ### 9. Done!
 
-You can open URL displayed IP address.
+You can open the URL displayed IP address.
 
 * http://IP_ADDRESS/
 
@@ -88,7 +88,7 @@ You can open URL displayed IP address.
 
 ## NOTE
 
-* `Syncing...` shows block downloads.
+* `Syncing...` means downloading the blocks.
   * It takes a lot of time and sometimes restarts.
 * If ePaper displays "no IP addr", Raspberry Pi does not get IP address from DHCP server.  
   ![noipaddr](images/noipaddr.jpg)

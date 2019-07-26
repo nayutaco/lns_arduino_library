@@ -93,8 +93,8 @@ Ptarmigan SPV mode uses the following feerate service.
 
 ## What is "restart DL"?
 
-Sometimes, startup syncing status shows "restart DL", and restart syncing.  
-  
+Sometimes, startup syncing status shows "fail DL", and restart syncing.  
+   
 ![fail DL](images/fail_dl.jpg)
 
 It happens that SPV(bitcoinj) fails to download for more than one minute and restart Ptarmigan.  
