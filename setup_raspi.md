@@ -10,13 +10,17 @@ RaspbianOS + Lightning Shield for Arduino modules
 
 ### 1. Download a SD image file
 
-* (Download URL: under development!)
+* [v0.0.1](https://github.com/nayutaco/lns_arduino_library/releases/tag/v0.0.1)
 
-### 2. Write the image to the SD card
+### 2. unzip
+
+unzip downloaded file.
+
+### 3. Write the image to the SD card
 
 Please refere to [how to write a SD card image](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 
-### 3. Turn on the power
+### 3. Turn the power on
 
 Before turning on the power, insert the SD card into the Raspberry Pi combined with the Lightning Shield.  
 ![insert](images/insert_sd.jpg)
@@ -24,6 +28,8 @@ Before turning on the power, insert the SD card into the Raspberry Pi combined w
 After that, supply power through USB/AC adapter/micro-B USB and turn on the power! Do not worry about the first boot, it takes about a few minutes to show the first display. 
 
 The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!  
+
+![first boot](images/firstboot.jpg)
 
 ## WiFi setting and CLIENT mode
 
@@ -52,7 +58,7 @@ The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!
 
 ![login](images/web_login.jpg)
 
-### 4. **Menu: WiFi Settings > WPA_Supplicant [SSID] [PASS]**  
+### 4. **Menu: Device > WiFi Settings** 
 
 ![ssid](images/wifi_01.jpg)
 
@@ -60,7 +66,7 @@ The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!
 
 * In the same way to connect your phone to WiFi
 
-### 6. **Menu: WiFi Settings > Reboot with WiFi Client Mode**  
+### 6. **Menu: Device > Reboot > Change Client Mode**  
 
 ![cli](images/wifi_02.jpg)
 

@@ -1,4 +1,4 @@
-# [Index](index.html)> Display on ePaper
+# [Index](index.html)> Displaying an invoice
 
 ## When you create an invoice
 

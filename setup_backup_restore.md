@@ -1,12 +1,14 @@
 # [Index](index.html)> Backup & Restore DB
 
+## Introduction to backup & restore DB for updating a SD card.
+
 Here, we would like to introduce backup & restore DB for updating a SD card.
 
 1. Backup DB (When this step is in Client mode)
-    ⅰ. **Menu: Raspberry pi Controls > Backup & Restore DB**  
+    ⅰ. **Menu: Debug > Backup / Restore DB**  
        ![backup & restore](images/bs01.jpg)
     
-    ⅱ. Create a Backup file(yyyymmdd.tar.gz)  
+    ⅱ. Create a Backup file(lnshield_backup_'hostname'_yyyymmddhms.tar.gz)  
        This step makes 'ptarmd' stop, so you cannot keep using it without rebooting this device.
        ![backup](images/bs02.jpg)
 
@@ -26,19 +28,19 @@ Here, we would like to introduce backup & restore DB for updating a SD card.
             1. After downloading backup, you must not reboot the device and change balance.  
             2. After restoring DB and changing blance, you must not use same backup file to start over.  
             
-    ⅰ. **Menu: Raspberry pi Controls > Backup & Restore DB**  
+    ⅰ. **Menu: Debug > Backup / Restore DB**  
        ![backup & restore](images/bs01.jpg)
     
     ⅱ. Click 'Restore'  
        ![backup](images/bs04.jpg)
 
-    ⅲ. Browse the backup file(yyyymmdd.tar.gz)  
+    ⅲ. Browse the backup file  
        In this step, you have to select the backup file downloaded in step 1-iii.  
        There is no need to give the file name ‘ lnshield_* ’, but its file extension must to be ‘.tar.gz’.
        ![backup](images/bs05.jpg)
 
     ⅳ. Upload the file  
-        Confirm the name you selected is correct and click 'upload'.
+        Confirm the name you selected is correct and click 'upload' button.
        ![backup](images/bs06.jpg)
 
     ⅴ. Update DB  
@@ -50,7 +52,7 @@ Here, we would like to introduce backup & restore DB for updating a SD card.
        ![complete](images/bs08.jpg)
 
 4. Reboot with Client mode
-    1. **Menu: Raspberry pi Controls > Reboot with Client mode**
+    1. **Menu: Debug > Reboot > Change Client mode**
    
     2. Confirm 'show channel info' or 'Get 1st layer info' etc.  
        You can confirm it would return to original balance or state.  

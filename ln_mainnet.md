@@ -1,6 +1,7 @@
 # [Index](index.html)> The mainnet of Lightning Network
 
-Lightning Shield supports both the testnet and mainnet of Bitcoin. The initial state is the testnet. If you want to use the mainnet of Lightning Network, please change the Bitcoin network to it and restart.  
+Lightning Shield supports both the testnet and mainnet of Bitcoin.  
+If you want to use the mainnet of Lightning Network, please change the Bitcoin network to it and restart.  
 
 * [changing the network to the mainnet](#changing-the-network-to-the-mainnet)
 * [open channel from LNBIG (mainnet)](#open-channel-from-lnbig-mainnet)
@@ -15,7 +16,7 @@ NOTE: Please use something Linux console.
 
 ### 1. Change the network to the mainnet and wait for an automatic reboot
 
-**Menu: 1st Layer > Change Blockchain Network**  
+**Menu: Bitcoin > Change Blockchain Network**  
 ![change blockchain](images/ln_mainnet01.jpg)
 
 ### 2. Mainnet starts
@@ -24,14 +25,14 @@ NOTE: Please use something Linux console.
 
 ### 3. Check my node_id
 
-**Menu: Channel > Show Connect Info**
+**Menu: Lightning Network > Information**
 
-### 4. Connect to the [LNBIG](https://lnbig.com/#/) and making the API call
+### 4. Connect to [LNBIG](https://lnbig.com/#/) and making the API call
 
 1. Select "LND / C-Lightning / BTCPay / Eclair" and click the NEXT.  
 ![change blockchain](images/ln_mainnet03.jpg)
 
-2. Click the COPY on "Commands for LND"
+2. click the COPY on "Commands for LND"
 ![change blockchain](images/ln_mainnet04.jpg)
 
 3. Save the text in `lnbig.txt` on your Linux console
@@ -49,7 +50,7 @@ ex.
 
 ### 6. Connect LNBIG using the connection string
 
-**Menu: Connect/Close > Connect [NODE_ID@IPADDR:PORT]**
+**Menu: Lightning Network > Connect Node**
 
 ### 7. If the connection is OK, execute the command below to get call the LNBIG API string.
 

@@ -5,7 +5,6 @@ Now, let's make a Lightning payment!
 * [Create an invoice](#create-an-invoice)
 * [Payment](#payment)
 
-
 ## Create an invoice
 
 1. Create an invoice from the WEB setting.
