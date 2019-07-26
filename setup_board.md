@@ -33,7 +33,7 @@ You need to solder pins to connect Arduino.
 
 ## ePaper
 
-[Please watch the how-to-use video](https://youtu.be/c-4CIAWcO2I)  
+[Watch the how-to-use video](https://youtu.be/c-4CIAWcO2I)  
 ![image](images/youtube_epaper.jpg)  
 
 ### 1. Pull the ePaper's connectors
