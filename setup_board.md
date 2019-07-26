@@ -28,7 +28,7 @@ Arduino UNO
 
 ## Arduino pin
 
-you need to solder pins to connect Arduino.  
+You need to solder pins to connect Arduino.  
 ![solder](images/arduino_solder.jpg)
 
 ## ePaper
