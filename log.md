@@ -1,4 +1,4 @@
-# [Index](index.html)> About System log
+# [Index](index.html)> About log
 
 Lightning Shield supports downloading logs.  
 If you want to find the cause of error, it would help you.
