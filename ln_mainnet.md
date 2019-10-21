@@ -82,13 +82,14 @@ If you connect Raspberry Pi via SSH, copy `Commands for LND` strings to `lnbig.t
 
 ```bash
 #!/bin/sh
+PTARMCLI=/home/pi/Prog/ptarmigan/install/ptarmcli
+LNBIG_TXT=lnbig.txt
 
-CONN_STR=`cat lnbig.txt | sed -e 's/^lncli connect \(.*$\)/\1/g' | sed -e 's/^\(.*9735\).*/\1/g'`
+CONN_STR=`cat $LNBIG_TXT | sed -e 's/^lncli connect \(.*$\)/\1/g' | sed -e 's/^\(.*9735\).*/\1/g'`
 echo $CONN_STR
-/home/pi/Prog/ptarmigan/install/ptarmcli --connaddr $CONN_STR
+$PTARMCLI --connaddr $CONN_STR
 
-
-NODEID=`/home/pi/Prog/ptarmigan/install/ptarmcli -l1 | jq -r '.result.node_id'`
-API=`cat lnbig.txt | sed -e 's/.*\(https.*$\)/\1/g' | sed -e "s/^\(.*\)&private.*/\1/g"`
+NODEID=`$PTARMCLI -l1 | jq -r '.result.node_id'`
+API=`cat $LNBIG_TXT | sed -e 's/.*\(https.*$\)/\1/g' | sed -e "s/^\(.*\)&private.*/\1/g"`
 echo -n $NODEID | curl -G --data-urlencode remoteid@- "$API&private=0"
 ```
