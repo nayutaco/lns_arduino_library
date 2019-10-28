@@ -21,7 +21,7 @@ ePaper
 
 ePaper is fragile.  
 Please be careful when you carry it.
-![broken epaper](image/epaper_broken.jpg)
+![broken epaper](images/epaper_broken.jpg)
 
 ### Things need to be prepared by yourself
 
