@@ -17,6 +17,12 @@ Board
 ePaper  
 ![epaper](images/epaper.jpg)
 
+#### NOTE
+
+ePaper is fragile.  
+Please be careful when you carry it.
+![broken epaper](image/epaper_broken.jpg)
+
 ### Things need to be prepared by yourself
 
 Raspberry Pi Zero W  
@@ -24,7 +30,6 @@ Raspberry Pi Zero W
 
 Arduino UNO  
 ![arduino](images/arduino.jpg)
-
 
 ## Arduino pin
 
