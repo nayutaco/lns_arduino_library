@@ -2,6 +2,7 @@
 
 * [SD card](#sd-card)
 * [WiFi setting and reboot CLIENT mode](#wifi-setting-and-reboot-client-mode)
+* [Partial Update](#partial-update)
 
 ## SD card
 
@@ -19,7 +20,7 @@ unzip downloaded file.
 
 Please refere to [how to write a SD card image](https://www.raspberrypi.org/documentation/installation/installing-images/README.md)
 
-### 3. Turn the power on
+### 4. Turn the power on
 
 Before turning on the power, insert the SD card into the Raspberry Pi combined with the Lightning Shield.  
 ![insert](images/insert_sd.jpg)
@@ -42,7 +43,6 @@ The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!
 * Password: `Ptarmigan`
 
 ![SSID](images/android_ssid.jpg)
-
 
 * If you see the following dialog, just tap "Yes".
 
@@ -82,8 +82,23 @@ The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!
 You can open the URL displayed IP address.
 
 * http://IP_ADDRESS/
+  * [http://lnshield.local/](http://lnshield.local/) : if avahi/bonjour/zeroconf can use.
 
 ![ipaddr](images/ipaddr.jpg)
+
+## Partial Update
+
+If you install [v0.1.1](https://github.com/nayutaco/lns_arduino_library/releases/tag/v0.1.1) or newer, you can use "Partial Update" method.  
+This is experimental.
+
+1. Download `RPI_SWUPDATE`.
+2. copy `RPI_SWUPDATE` to SDcard `boot` partition.
+![copy](images/pu_file.jpg)
+3. insert SDcard to Raspberry Pi.
+4. power on Raspberry Pi and wait Lightning Shield LED turn on.
+5. Press both Lightning Shield buttons in 3 seconds.
+6. Release buttons if displaying "SW Update!".
+7. After update, Lightning Shield start automatically.
 
 ## NOTE
 
