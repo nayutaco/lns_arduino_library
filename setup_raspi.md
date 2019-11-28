@@ -100,6 +100,8 @@ This is experimental.
 6. Release buttons if displaying "SW Update!".
 7. After update, Lightning Shield start automatically.
 
+![partial update](https://youtu.be/RJbkHu44gPI)
+
 ## NOTE
 
 * `Syncing...` means downloading the blocks.
