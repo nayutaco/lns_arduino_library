@@ -27,6 +27,13 @@ Before turning on the power, insert the SD card into the Raspberry Pi combined w
 
 After that, supply power through USB/AC adapter/micro-B USB and turn on the power! Do not worry about the first boot, it takes about a few minutes to show the first display.  
 
+
+**Be careful!!**  
+If you are using an Arduino, make sure that the programs written on the Arduino do not damage the Lightning Shield(pin 0, 1, 4).  
+Please check your program before power on.
+
+![pin](images/lnshield_pin.jpg)
+
 The [first boot](https://youtu.be/kF_WI_qtKfI) video can help you!  
 
 ![first boot](images/firstboot.jpg)
