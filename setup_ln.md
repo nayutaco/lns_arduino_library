@@ -16,7 +16,7 @@ Let's go to the next step - open a channel.
 
 ### 1. Check my node_id
 
-**Menu: Channel > Show Connect Info**  
+**Menu: Lightning Network > Information**  
 ![show channel](images/ln_testnet01.jpg)
 
 ### 2. Connect to other node that you want to open channel with
@@ -30,7 +30,7 @@ Let's go to the next step - open a channel.
         * Please use [Bitcoin Testnet Lightning Network Faucet](https://faucet.lightning.community/).
 
    2. Connect to the peer node  
-      Currently, Faucet node_id is `0270685ca81a8e4d4d01beec5781f4cc924684072ae52c507f8ebe9daf0caaab7b@159.203.125.125:9735` (please check the faucet site).  
+      Currently(Oct.28,2020), Faucet node_id is `0270685ca81a8e4d4d01beec5781f4cc924684072ae52c507f8ebe9daf0caaab7b@159.203.125.125:9735` (please check the faucet site).  
       **Menu: Lightning Network > Connect Node**  
       ![connect](images/ln_testnet02.jpg)
 
@@ -39,6 +39,8 @@ Let's go to the next step - open a channel.
       ![show channel](images/ln_testnet03.jpg)
 
 ### 3. Open channel from the peer node
+
+`Target Node`: Your Lightning Shield's node id("Menu: Lightning Network > Information >> Local Information:node id")
 
 ![testnet faucet](images/ln_testnet04.jpg)
 
